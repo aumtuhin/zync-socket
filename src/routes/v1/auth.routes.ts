@@ -1,5 +1,9 @@
 import express from 'express'
-import { register, login } from '../../controllers/auth.controller'
+import {
+  register,
+  login,
+  refreshToken,
+} from '../../controllers/auth.controller'
 import {
   loginValidator,
   registerValidator,
@@ -10,5 +14,6 @@ const router = express.Router()
 
 router.post('/register', registerValidator, handleValidation, register)
 router.post('/login', loginValidator, handleValidation, login)
+router.post('/refresh-token', refreshToken)
 
 export default router

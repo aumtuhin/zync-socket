@@ -2,8 +2,7 @@ import { Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import User from '../models/User'
-
-const JWT_SECRET = process.env.JWT_SECRET as string
+import { refreshTokenService } from '../services/auth.service'
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -33,6 +32,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 }
 
 export const login = async (req: Request, res: Response): Promise<void> => {
+  const JWT_SECRET = process.env.JWT_SECRET as string
+
   try {
     const { email, password } = req.body
 
@@ -56,5 +57,16 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     res.json({ token })
   } catch (error) {
     res.status(500).json({ message: 'Server error', error })
+  }
+}
+
+export const refreshToken = async (req: Request, res: Response) => {
+  try {
+    const result = await refreshTokenService(req.cookies.refresh_token)
+    res.json({ token: result })
+    return
+  } catch (error) {
+    res.status(403).json({ message: 'Invalid refresh token', error })
+    return
   }
 }

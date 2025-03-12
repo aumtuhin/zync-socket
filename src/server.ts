@@ -3,8 +3,10 @@ import dotenv from 'dotenv'
 import cors from 'cors'
 import helmet from 'helmet'
 import morgan from 'morgan'
-import mongoose from 'mongoose'
-import { authRoutes } from './routes/v1'
+
+import { connectDB } from './config/db.config'
+
+import authRoutes from './routes/v1/auth.routes'
 
 dotenv.config()
 
@@ -21,10 +23,7 @@ app.use(morgan('dev'))
 app.use('/api/v1/auth', authRoutes)
 
 // MongoDB Connection
-mongoose
-  .connect(process.env.MONGO_URI as string)
-  .then(() => console.log('MongoDB Connected'))
-  .catch((err) => console.error('MongoDB Connection Error:', err))
+connectDB()
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
