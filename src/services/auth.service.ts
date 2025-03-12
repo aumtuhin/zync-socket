@@ -39,7 +39,6 @@ export const loginUser = async (email: string, password: string) => {
 }
 
 export const refreshTokenService = async (refreshToken: string) => {
-  console.log('rereshtoken', refreshToken)
   const JWT_SECRET = process.env.JWT_SECRET as string
   const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET as string
 

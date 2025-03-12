@@ -1,32 +1,26 @@
+import jwt, { JwtPayload } from 'jsonwebtoken'
 import { Request, Response, NextFunction } from 'express'
-import jwt from 'jsonwebtoken'
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: string
-    }
+declare module 'express' {
+  interface Request {
+    userId?: string | JwtPayload
   }
 }
 
-const JWT_SECRET = process.env.JWT_SECRET as string
+export const verifyAccessToken = (req: Request, res: Response, next: NextFunction) => {
+  const JWT_SECRET = process.env.JWT_SECRET as string
 
-export const authMiddleware = (
-  req: Request | any,
-  res: Response | any,
-  next: NextFunction | any,
-) => {
-  const token = req.header('Authorization')?.split(' ')[1]
-
+  const token = req.header('Authorization')?.replace('Bearer ', '')
   if (!token) {
-    return res.status(401).json({ message: 'Unauthorized' })
+    res.status(401).json({ message: 'Access token is missing' })
+    return
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: string }
-    req.user = decoded.id
-    next()
+    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload
+    req.userId = decoded.id // Attach decoded user data to the request
+    next() // Proceed to the next handler
   } catch (error) {
-    res.status(401).json({ message: 'Invalid token' })
+    res.status(403).json({ message: 'Invalid or expired access token' })
   }
 }

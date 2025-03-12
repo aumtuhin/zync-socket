@@ -1,10 +1,16 @@
 import express from 'express'
-import { authMiddleware } from '../../middleware/auth.middleware'
+import { JwtPayload } from 'jsonwebtoken'
+import { verifyAccessToken } from '../../middleware/auth.middleware'
+import { userProfile } from '../../controllers/user.controller'
+
+declare module 'express' {
+  interface Request {
+    user?: string | JwtPayload
+  }
+}
 
 const router = express.Router()
 
-router.get('/profile', authMiddleware, (req, res) => {
-  res.json({ message: 'Protected route accessed', userId: req.user })
-})
+router.get('/profile', verifyAccessToken, userProfile)
 
 export default router

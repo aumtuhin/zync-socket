@@ -8,6 +8,8 @@ import cookieParser from 'cookie-parser'
 import { connectDB } from './config/db.config'
 
 import authRoutes from './routes/v1/auth.routes'
+import userRouter from './routes/v1/user.routes'
+import { apiKeyMiddleware } from './middleware/apiKey.middleware'
 
 dotenv.config()
 
@@ -23,7 +25,9 @@ app.use(helmet())
 app.use(morgan('dev'))
 
 // Routes
+app.use('/api/v1', apiKeyMiddleware) // Apply to ALL /api/v1 routes
 app.use('/api/v1/auth', authRoutes)
+app.use('/api/v1/user', userRouter)
 
 // MongoDB Connection
 connectDB()

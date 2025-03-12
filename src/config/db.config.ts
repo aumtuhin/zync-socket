@@ -4,9 +4,7 @@ import { MONGO_URI } from './env.config'
 export const connectDB = async () => {
   try {
     if (!MONGO_URI) {
-      throw new Error(
-        'MongoDB URI is not defined in the environment variables.',
-      )
+      throw new Error('MongoDB URI is not defined in the environment variables.')
     }
 
     // Connect to MongoDB without the deprecated options
