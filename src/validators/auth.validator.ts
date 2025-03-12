@@ -1,19 +1,19 @@
-import { body } from "express-validator";
+import { body } from 'express-validator'
 
 export const registerValidator = [
-  body("username")
+  body('username')
     .isLength({ min: 3, max: 30 })
-    .withMessage("Username must be between 3 and 30 characters.")
+    .withMessage('Username must be between 3 and 30 characters.')
     .notEmpty()
-    .withMessage("Username is required."),
-  body("email")
+    .withMessage('Username is required.'),
+  body('email')
     .isEmail()
-    .withMessage("Email must be a valid email.")
+    .withMessage('Email must be a valid email.')
     .notEmpty()
-    .withMessage("Email is required."),
-  body("password")
+    .withMessage('Email is required.'),
+  body('password')
     .isLength({ min: 6 })
-    .withMessage("Password must be at least 6 characters long.")
+    .withMessage('Password must be at least 6 characters long.')
     .notEmpty()
-    .withMessage("Password is required."),
-];
+    .withMessage('Password is required.'),
+]
