@@ -10,12 +10,14 @@ import { connectDB } from './config/db.config'
 import authRoutes from './routes/v1/auth.routes'
 import userRouter from './routes/v1/user.routes'
 import { apiKeyMiddleware } from './middleware/apiKey.middleware'
+import { getLocalIp } from './utils/get-ip.utils'
 
 dotenv.config()
 
 const app = express()
 
-const PORT = process.env.PORT || 5000
+const PORT = process.env.PORT || 8000
+const IP = getLocalIp()
 
 // Middleware
 app.use(cookieParser())
@@ -33,5 +35,5 @@ app.use('/api/v1/user', userRouter)
 connectDB()
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+  console.log(`Server running at http://${IP}:${PORT}`, `http://localhost:${PORT}`)
 })
