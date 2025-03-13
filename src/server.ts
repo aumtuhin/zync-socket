@@ -25,7 +25,7 @@ app.use(helmet())
 app.use(morgan('dev'))
 
 // Routes
-app.use('/api/v1', apiKeyMiddleware) // Apply to ALL /api/v1 routes
+// app.use('/api/v1', apiKeyMiddleware) // Apply to ALL /api/v1 routes
 app.use('/api/v1/auth', authRoutes)
 app.use('/api/v1/user', userRouter)
 
