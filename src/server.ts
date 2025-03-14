@@ -28,11 +28,14 @@ app.use(morgan('dev'))
 
 // Routes
 // app.use('/api/v1', apiKeyMiddleware) // Apply to ALL /api/v1 routes
+app.use('/', (req, res) => {
+  res.send('Welcome to the API')
+})
 app.use('/api/v1/auth', authRoutes)
 app.use('/api/v1/user', userRouter)
 
 // MongoDB Connection
-connectDB()
+// connectDB()
 
 app.listen(PORT, () => {
   console.log(`Server running at http://${IP}:${PORT}`, `http://localhost:${PORT}`)
