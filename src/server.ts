@@ -5,12 +5,17 @@ import helmet from 'helmet'
 import morgan from 'morgan'
 import cookieParser from 'cookie-parser'
 
-import { connectDB } from './config/db.config'
-
+// Routes
 import authRoutes from './routes/v1/auth.routes'
 import userRouter from './routes/v1/user.routes'
+
+// Middleware
 import { apiKeyMiddleware } from './middleware/apiKey.middleware'
+
+// Utils & Config
+import { connectDB } from './config/db.config'
 import { getLocalIp } from './utils/get-ip.utils'
+import { corsOptions } from './config/cors.config'
 
 dotenv.config()
 
@@ -22,12 +27,7 @@ const IP = getLocalIp()
 // Middleware
 app.use(cookieParser())
 app.use(express.json())
-app.use(
-  cors({
-    origin: 'http://localhost:3000',
-    credentials: true, // Allow cookies and authorization headers
-  }),
-)
+app.use(cors(corsOptions))
 app.use(helmet())
 app.use(morgan('dev'))
 
