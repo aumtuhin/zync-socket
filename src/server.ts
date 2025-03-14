@@ -28,7 +28,7 @@ app.use(morgan('dev'))
 
 // Routes
 // app.use('/api/v1', apiKeyMiddleware) // Apply to ALL /api/v1 routes
-app.use('/', (req, res) => {
+app.get('/', (req, res) => {
   res.send('Welcome to the API')
 })
 app.use('/api/v1/auth', authRoutes)
