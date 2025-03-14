@@ -10,7 +10,7 @@ import { connectDB } from './config/db.config'
 import authRoutes from './routes/v1/auth.routes'
 import userRouter from './routes/v1/user.routes'
 import { apiKeyMiddleware } from './middleware/apiKey.middleware'
-import { getLocalIp } from '@/utils/get-ip.utils'
+import { getLocalIp } from './utils/get-ip.utils'
 
 dotenv.config()
 
