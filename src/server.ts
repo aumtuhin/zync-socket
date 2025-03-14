@@ -35,8 +35,8 @@ app.use('/api/v1/auth', authRoutes)
 app.use('/api/v1/user', userRouter)
 
 // MongoDB Connection
-// connectDB()
+connectDB()
 
 app.listen(PORT, () => {
-  console.log(`Server running at http://${IP}:${PORT}`, `http://localhost:${PORT}`)
+  console.log(`Server running at PORT ${PORT}`)
 })
