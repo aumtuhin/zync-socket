@@ -22,7 +22,12 @@ const IP = getLocalIp()
 // Middleware
 app.use(cookieParser())
 app.use(express.json())
-app.use(cors())
+app.use(
+  cors({
+    origin: 'http://localhost:3000',
+    credentials: true, // Allow cookies and authorization headers
+  }),
+)
 app.use(helmet())
 app.use(morgan('dev'))
 
