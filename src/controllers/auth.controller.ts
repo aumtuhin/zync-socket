@@ -42,8 +42,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     res.status(201).json({
       message: 'User registered successfully',
-      accessToken: token,
-      refreshToken: refreshToken,
+      token,
+      refreshToken,
     })
   } catch (error) {
     res.status(500).json({ message: 'Server error', error })
@@ -83,7 +83,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       maxAge: 30 * 24 * 60 * 60 * 1000, // Set cookie expiration date (30 days)
     })
 
-    res.json({ accessToken: token, refreshToken: refreshToken })
+    res.json({ token, refreshToken })
     return
   } catch (error) {
     res.status(500).json({ message: 'Server error', error })
@@ -98,7 +98,7 @@ export const refreshToken = async (req: Request, res: Response) => {
       return
     }
     const token = await refreshTokenService(req.cookies.refresh_token)
-    res.json({ accessToken: token })
+    res.json({ token })
     return
   } catch (error) {
     res.status(403).json({ message: 'Invalid refresh token', error })
