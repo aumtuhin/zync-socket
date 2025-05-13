@@ -1,5 +1,5 @@
-import jwt, { JwtPayload } from 'jsonwebtoken'
-import { Request, Response, NextFunction } from 'express'
+import jwt, { type JwtPayload } from 'jsonwebtoken'
+import type { Request, Response, NextFunction } from 'express'
 
 declare module 'express' {
   interface Request {
@@ -21,6 +21,6 @@ export const verifyAccessToken = (req: Request, res: Response, next: NextFunctio
     req.userId = decoded.id // Attach decoded user data to the request
     next() // Proceed to the next handler
   } catch (error) {
-    res.status(403).json({ message: 'Invalid or expired access token' })
+    res.status(403).json({ message: 'Invalid or expired access token', error })
   }
 }
