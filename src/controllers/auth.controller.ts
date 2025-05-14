@@ -1,11 +1,23 @@
 import type { Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
-import jwt from 'jsonwebtoken'
 import nodemailer from 'nodemailer'
+import twilio from 'twilio'
 
-import User from '@/models/User'
-import { refreshTokenService } from '@/services/auth.service'
-import { generateOTP } from '@/utils/otp-generator'
+import fs from 'node:fs'
+import handlebars from 'handlebars'
+import { resolve } from 'node:path'
+
+import User from '../models/User'
+import { refreshTokenService } from '../services/auth.service'
+import { generateOTP } from '../utils/otp-generator.utils'
+import { generateJwtToken } from '../utils/jwt-token-generator.utils'
+
+// todo move to utils or config
+const cookieOptions = {
+  httpOnly: true,
+  secure: false, // Use `false` in development
+  maxAge: 30 * 24 * 60 * 60 * 1000, // Set cookie expiration date (30 days)
+}
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   // eslint-disable-next-line no-undef
@@ -34,16 +46,10 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     await user.save()
 
-    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' })
-    const refreshToken = jwt.sign({ id: user._id }, JWT_REFRESH_SECRET, {
-      expiresIn: '7d',
-    })
+    const token = generateJwtToken(user._id as string, JWT_SECRET, '1h')
+    const refreshToken = generateJwtToken(user._id as string, JWT_REFRESH_SECRET, '30d')
 
-    res.cookie('refresh_token', refreshToken, {
-      httpOnly: true,
-      secure: false, // Use `false` in development
-      maxAge: 30 * 24 * 60 * 60 * 1000, // Set cookie expiration date (30 days)
-    })
+    res.cookie('refresh_token', refreshToken, cookieOptions)
 
     res.status(201).json({
       message: 'User registered successfully',
@@ -79,16 +85,10 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Generate token
-    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' })
-    const refreshToken = jwt.sign({ id: user._id }, JWT_REFRESH_SECRET, {
-      expiresIn: '7d',
-    })
+    const token = generateJwtToken(user._id as string, JWT_SECRET, '1h')
+    const refreshToken = generateJwtToken(user._id as string, JWT_REFRESH_SECRET, '30d')
 
-    res.cookie('refresh_token', refreshToken, {
-      httpOnly: true,
-      secure: false, // Use `false` in development
-      maxAge: 30 * 24 * 60 * 60 * 1000, // Set cookie expiration date (30 days)
-    })
+    res.cookie('refresh_token', refreshToken, cookieOptions)
 
     res.json({ token, refreshToken })
     return
@@ -97,8 +97,61 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// Send OTP via Email or Phone
-export const sendOTP = async (req: Request, res: Response): Promise<void> => {
+// Send OTP via Phone
+export const sendPhoneOTP = async (req: Request, res: Response): Promise<void> => {
+  const { phone } = req.body
+  // eslint-disable-next-line no-undef
+  const accountSid = process.env.TWILIO_ACCOUNT_SID as string
+  // eslint-disable-next-line no-undef
+  const authToken = process.env.TWILIO_AUTH_TOKEN as string
+  // eslint-disable-next-line no-undef
+  const serviceSid = process.env.TWILIO_SERVICE_SID as string
+  const client = twilio(accountSid, authToken)
+
+  try {
+    const otpRes = await client.verify.v2
+      .services(serviceSid)
+      .verifications.create({ to: phone, channel: 'sms' })
+    if (otpRes.status === 'pending') {
+      res.status(200).json({ message: 'OTP sent successfully', to: phone })
+    }
+    return
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to send OTP', error })
+    return
+  }
+}
+
+// Send OTP via Phone
+export const verifyPhoneOTP = async (req: Request, res: Response): Promise<void> => {
+  const { phone } = req.body
+  const { otp } = req.body
+
+  // eslint-disable-next-line no-undef
+  const accountSid = process.env.TWILIO_ACCOUNT_SID as string
+  // eslint-disable-next-line no-undef
+  const authToken = process.env.TWILIO_AUTH_TOKEN as string
+  // eslint-disable-next-line no-undef
+  const serviceSid = process.env.TWILIO_SERVICE_SID as string
+  const client = twilio(accountSid, authToken)
+
+  try {
+    const otpRes = await client.verify.v2
+      .services(serviceSid)
+      .verificationChecks.create({ to: phone, code: otp })
+
+    if (otpRes.status === 'approved') {
+      res.status(200).json({ message: 'OTP verified successfully', status: otpRes.status })
+    }
+    return
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to send OTP', error })
+    return
+  }
+}
+
+// Send OTP via Email
+export const sendEmailOTP = async (req: Request, res: Response): Promise<void> => {
   // eslint-disable-next-line no-undef
   const EMAIL_USER = process.env.EMAIL_USER as string
   // eslint-disable-next-line no-undef
@@ -109,6 +162,16 @@ export const sendOTP = async (req: Request, res: Response): Promise<void> => {
   const { email } = req.body
   const otp = generateOTP()
 
+  // eslint-disable-next-line no-undef
+  const templatePath = resolve(process.cwd(), 'src/templates/otpEmail.hbs')
+  const templateSource = fs.readFileSync(templatePath, 'utf8')
+  const template = handlebars.compile(templateSource)
+
+  const html = template({
+    otp: otp,
+    expiry: 10,
+  })
+
   const transporter = nodemailer.createTransport({
     service: EMAIL_SERVICE,
     auth: {
@@ -117,21 +180,12 @@ export const sendOTP = async (req: Request, res: Response): Promise<void> => {
     },
   })
 
+  // todo move to utils and handle as html file
   const mailOptions = {
     from: `"OTP Service" <${EMAIL_USER}>`,
     to: email,
     subject: 'Your One-Time Password (OTP)',
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #2563eb;">Your Verification Code</h2>
-        <p>Please use the following code to verify your account:</p>
-        <div style="background: #f3f4f6; padding: 10px 15px; font-size: 24px; letter-spacing: 2px; display: inline-block; margin: 10px 0;">
-          ${otp}
-        </div>
-        <p>This code will expire in 10 minutes.</p>
-        <p>If you didn't request this, please ignore this email.</p>
-      </div>
-    `,
+    html: html,
   }
 
   try {

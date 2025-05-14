@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import type { Request, Response } from 'express'
 import User from '../models/User'
 
 export const userProfile = async (req: Request, res: Response): Promise<void> => {
@@ -11,8 +11,8 @@ export const userProfile = async (req: Request, res: Response): Promise<void> =>
     }
     res.json({ user })
     return
+    // eslint-disable-next-line no-unused-vars
   } catch (error) {
-    console.error(error)
     res.status(500).json({ message: 'Server error' })
   }
 }

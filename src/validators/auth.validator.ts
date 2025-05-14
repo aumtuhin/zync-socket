@@ -1,4 +1,4 @@
-import { body, oneOf } from 'express-validator'
+import { body } from 'express-validator'
 
 // Common validation messages
 const messages = {
@@ -10,6 +10,8 @@ const messages = {
   emailRequired: 'Email is required',
   phone: 'Please provide a valid phone number with country code (e.g. +1234567890)',
   contactRequired: 'Either email or phone number is required',
+  otp: 'Please provide a valid OTP',
+  otpInvalid: 'Invalid OTP',
 }
 
 const emailValidator = body('email')
@@ -36,10 +38,18 @@ const phoneValidator = body('phone')
   .notEmpty()
   .withMessage('Phone number is required.')
 
+const OTPValidator = body('otp')
+  .isLength({ min: 6, max: 6 })
+  .withMessage(messages.otpInvalid)
+  .notEmpty()
+  .withMessage(messages.otp)
+
 export const registerValidator = [usernameValidator, emailValidator, passwordValidator]
 
 export const loginValidator = [emailValidator, passwordValidator]
 
-export const requestOTPValidator = [
-  oneOf([emailValidator, phoneValidator], { message: messages.contactRequired }),
-]
+export const requestPhoneOTPValidator = [phoneValidator]
+
+export const requestEmailOTPValidator = [emailValidator]
+
+export const verifyPhoneOTPValidator = [OTPValidator]
