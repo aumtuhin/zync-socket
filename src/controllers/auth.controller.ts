@@ -223,7 +223,7 @@ export const sendEmailOTP = async (req: Request, res: Response): Promise<void> =
 
   try {
     await transporter.sendMail(mailOptions)
-    res.status(200).json({ message: 'OTP sent successfully', to: email, otp })
+    res.status(200).json({ message: 'OTP sent successfully', to: email })
   } catch (error) {
     res.status(500).json({ message: 'Failed to send OTP. Please try again.', error })
   }
