@@ -163,7 +163,7 @@ export const sendEmailOTP = async (req: Request, res: Response): Promise<void> =
   const otp = generateOTP()
 
   // eslint-disable-next-line no-undef
-  const templatePath = resolve(process.cwd(), 'src/templates/otpEmail.hbs')
+  const templatePath = resolve(process.cwd(), 'src/templates/otp-email.hbs')
   const templateSource = fs.readFileSync(templatePath, 'utf8')
   const template = handlebars.compile(templateSource)
 
