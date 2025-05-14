@@ -6,13 +6,14 @@ import {
   sendPhoneOTP,
   sendEmailOTP,
   verifyPhoneOTP,
+  verifyEmailOTP,
 } from '../../controllers/auth.controller'
 import {
   loginValidator,
   registerValidator,
   requestPhoneOTPValidator,
   requestEmailOTPValidator,
-  verifyPhoneOTPValidator,
+  verifyOTPValidator,
 } from '../../validators/auth.validator'
 import { formatValidationErrors } from '../../middleware/errorFormatter.middleware'
 import { otpLimiter } from '../../middleware/rateLimiter.middleware'
@@ -21,6 +22,7 @@ const router = express.Router()
 
 router.post('/register', registerValidator, formatValidationErrors, register)
 router.post('/login', loginValidator, formatValidationErrors, login)
+router.post('/refresh-token', refreshToken)
 router.post(
   '/request-phone-otp',
   otpLimiter,
@@ -38,10 +40,16 @@ router.post(
 router.post(
   '/verify-phone-otp',
   requestPhoneOTPValidator,
-  verifyPhoneOTPValidator,
+  verifyOTPValidator,
   formatValidationErrors,
   verifyPhoneOTP,
 )
-router.post('/refresh-token', refreshToken)
+router.post(
+  '/verify-email-otp',
+  requestEmailOTPValidator,
+  verifyOTPValidator,
+  formatValidationErrors,
+  verifyEmailOTP,
+)
 
 export default router

@@ -1,13 +1,15 @@
 import type { Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
+import fs from 'node:fs'
+import { resolve } from 'node:path'
 import nodemailer from 'nodemailer'
 import twilio from 'twilio'
-
-import fs from 'node:fs'
 import handlebars from 'handlebars'
-import { resolve } from 'node:path'
 
 import User from '../models/User'
+import OTPUser from '../models/OTP-User'
+import OTP from '../models/OTP'
+
 import { refreshTokenService } from '../services/auth.service'
 import { generateOTP } from '../utils/otp-generator.utils'
 import { generateJwtToken } from '../utils/jwt-token-generator.utils'
@@ -122,7 +124,7 @@ export const sendPhoneOTP = async (req: Request, res: Response): Promise<void> =
   }
 }
 
-// Send OTP via Phone
+// Verify Phone OTP
 export const verifyPhoneOTP = async (req: Request, res: Response): Promise<void> => {
   const { phone } = req.body
   const { otp } = req.body
@@ -152,6 +154,20 @@ export const verifyPhoneOTP = async (req: Request, res: Response): Promise<void>
 
 // Send OTP via Email
 export const sendEmailOTP = async (req: Request, res: Response): Promise<void> => {
+  const { email } = req.body
+  const existingUser = await OTPUser.findOne({
+    email,
+    isVerified: true,
+  })
+
+  if (existingUser) {
+    res.status(400).json({
+      error: 'User already exists and is verified',
+      userExists: true,
+    })
+    return
+  }
+
   // eslint-disable-next-line no-undef
   const EMAIL_USER = process.env.EMAIL_USER as string
   // eslint-disable-next-line no-undef
@@ -159,8 +175,26 @@ export const sendEmailOTP = async (req: Request, res: Response): Promise<void> =
   // eslint-disable-next-line no-undef
   const EMAIL_SERVICE = process.env.EMAIL_SERVICE || 'gmail'
 
-  const { email } = req.body
   const otp = generateOTP()
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes from now
+
+  // todo check existing otp and attempts from db, right now only rate limiter is used
+
+  // Delete any existing OTPs for this user
+  try {
+    await OTP.deleteMany({ email })
+  } catch (error) {
+    res.status(500).json({ message: 'Something went wrong! please try again later', error })
+    return
+  }
+
+  try {
+    // Save new OTP to database
+    await OTP.create({ email, otp, expiresAt })
+  } catch (error) {
+    res.status(500).json({ message: 'Something went wrong! please try again later', error })
+    return
+  }
 
   // eslint-disable-next-line no-undef
   const templatePath = resolve(process.cwd(), 'src/templates/otp-email.hbs')
@@ -180,7 +214,6 @@ export const sendEmailOTP = async (req: Request, res: Response): Promise<void> =
     },
   })
 
-  // todo move to utils and handle as html file
   const mailOptions = {
     from: `"OTP Service" <${EMAIL_USER}>`,
     to: email,
@@ -192,7 +225,64 @@ export const sendEmailOTP = async (req: Request, res: Response): Promise<void> =
     await transporter.sendMail(mailOptions)
     res.status(200).json({ message: 'OTP sent successfully', to: email, otp })
   } catch (error) {
-    res.status(500).json({ message: 'Failed to send OTP', error })
+    res.status(500).json({ message: 'Failed to send OTP. Please try again.', error })
+  }
+}
+
+// Verify Email OTP
+export const verifyEmailOTP = async (req: Request, res: Response): Promise<void> => {
+  const { email, otp } = req.body
+  const existingUser = await OTPUser.findOne({
+    email,
+    isVerified: true,
+  })
+  if (existingUser) {
+    res.status(400).json({
+      error: 'User already exists and is verified',
+      userExists: true,
+    })
+    return
+  }
+  const otpRecord = await OTP.findOne({
+    email,
+    otp,
+  })
+  if (!otpRecord) {
+    res.status(400).json({ message: 'Invalid OTP or OTP expired' })
+    return
+  }
+  if (otpRecord.attempts >= 3) {
+    res.status(400).json({ message: 'Maximum attempts reached. Please request a new OTP.' })
+    return
+  }
+  if (otpRecord.expiresAt < new Date()) {
+    res.status(400).json({ message: 'OTP expired. Please request a new OTP.' })
+    return
+  }
+  // Increment attempts
+  try {
+    await OTP.updateOne({ email, otp }, { $inc: { attempts: 1 } })
+  } catch (error) {
+    res.status(500).json({ message: 'Something went wrong! please try again later', error })
+    return
+  }
+  // Create or update OTPUser
+  try {
+    const otpUser = await OTPUser.findOneAndUpdate(
+      { email },
+      { isVerified: true },
+      { upsert: true, new: true },
+    )
+    if (!otpUser) {
+      res.status(400).json({ message: 'Failed to verify OTP' })
+      return
+    }
+    // Delete OTP record
+    await OTP.deleteOne({ email, otp })
+    res.status(200).json({ message: 'OTP verified successfully', otpUser })
+  } catch (error) {
+    res.status(500).json({ message: 'Something went wrong! please try again later', error })
+    return
   }
 }
 

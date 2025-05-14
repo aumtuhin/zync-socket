@@ -52,4 +52,4 @@ export const requestPhoneOTPValidator = [phoneValidator]
 
 export const requestEmailOTPValidator = [emailValidator]
 
-export const verifyPhoneOTPValidator = [OTPValidator]
+export const verifyOTPValidator = [OTPValidator]

@@ -1,6 +1,9 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import User from '../models/User'
+import { config } from 'dotenv'
+
+config()
 
 interface JwtPayload {
   id: string
@@ -51,8 +54,7 @@ export const refreshTokenService = async (refreshToken: string) => {
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
       throw new Error('Refresh token expired')
-    } else {
-      throw new Error('Invalid refresh token')
     }
+    throw new Error('Invalid refresh token')
   }
 }
