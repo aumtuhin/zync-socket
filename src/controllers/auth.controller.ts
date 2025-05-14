@@ -1,11 +1,16 @@
-import { Request, Response } from 'express'
+import type { Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import User from '../models/User'
-import { refreshTokenService } from '../services/auth.service'
+import nodemailer from 'nodemailer'
+
+import User from '@/models/User'
+import { refreshTokenService } from '@/services/auth.service'
+import { generateOTP } from '@/utils/otp-generator'
 
 export const register = async (req: Request, res: Response): Promise<void> => {
+  // eslint-disable-next-line no-undef
   const JWT_SECRET = process.env.JWT_SECRET as string
+  // eslint-disable-next-line no-undef
   const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET as string
 
   try {
@@ -51,7 +56,9 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 }
 
 export const login = async (req: Request, res: Response): Promise<void> => {
+  // eslint-disable-next-line no-undef
   const JWT_SECRET = process.env.JWT_SECRET as string
+  // eslint-disable-next-line no-undef
   const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET as string
 
   try {
@@ -87,6 +94,51 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     return
   } catch (error) {
     res.status(500).json({ message: 'Server error', error })
+  }
+}
+
+// Send OTP via Email or Phone
+export const sendOTP = async (req: Request, res: Response): Promise<void> => {
+  // eslint-disable-next-line no-undef
+  const EMAIL_USER = process.env.EMAIL_USER as string
+  // eslint-disable-next-line no-undef
+  const EMAIL_PASS = process.env.EMAIL_PASS as string
+  // eslint-disable-next-line no-undef
+  const EMAIL_SERVICE = process.env.EMAIL_SERVICE || 'gmail'
+
+  const { email } = req.body
+  const otp = generateOTP()
+
+  const transporter = nodemailer.createTransport({
+    service: EMAIL_SERVICE,
+    auth: {
+      user: EMAIL_USER,
+      pass: EMAIL_PASS,
+    },
+  })
+
+  const mailOptions = {
+    from: `"OTP Service" <${EMAIL_USER}>`,
+    to: email,
+    subject: 'Your One-Time Password (OTP)',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2563eb;">Your Verification Code</h2>
+        <p>Please use the following code to verify your account:</p>
+        <div style="background: #f3f4f6; padding: 10px 15px; font-size: 24px; letter-spacing: 2px; display: inline-block; margin: 10px 0;">
+          ${otp}
+        </div>
+        <p>This code will expire in 10 minutes.</p>
+        <p>If you didn't request this, please ignore this email.</p>
+      </div>
+    `,
+  }
+
+  try {
+    await transporter.sendMail(mailOptions)
+    res.status(200).json({ message: 'OTP sent successfully', to: email, otp })
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to send OTP', error })
   }
 }
 

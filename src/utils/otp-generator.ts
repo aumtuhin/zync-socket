@@ -16,6 +16,7 @@ export const generateOTP = (): string => {
 
     // Standard crypto approach
     return crypto.randomInt(100000, 999999).toString()
+    // eslint-disable-next-line no-unused-vars
   } catch (error) {
     throw new Error('Failed to generate secure OTP')
   }

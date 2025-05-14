@@ -2,12 +2,14 @@ import jwt, { type JwtPayload } from 'jsonwebtoken'
 import type { Request, Response, NextFunction } from 'express'
 
 declare module 'express' {
+  // eslint-disable-next-line no-unused-vars
   interface Request {
     userId?: string | JwtPayload
   }
 }
 
 export const verifyAccessToken = (req: Request, res: Response, next: NextFunction) => {
+  // eslint-disable-next-line no-undef
   const JWT_SECRET = process.env.JWT_SECRET as string
 
   const token = req.header('Authorization')?.replace('Bearer ', '')
