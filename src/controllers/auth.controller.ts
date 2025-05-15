@@ -248,15 +248,21 @@ export const verifyEmailOTP = async (req: Request, res: Response): Promise<void>
     otp,
   })
   if (!otpRecord) {
-    res.status(400).json({ message: 'Invalid OTP or OTP expired' })
+    res.status(400).json({ message: 'Invalid OTP or OTP expired', invalid: true })
     return
   }
   if (otpRecord.attempts >= 3) {
-    res.status(400).json({ message: 'Maximum attempts reached. Please request a new OTP.' })
+    res
+      .status(400)
+      .json({ message: 'Maximum attempts reached. Please request a new OTP.', maxAttempts: true })
     return
   }
-  if (otpRecord.expiresAt < new Date()) {
-    res.status(400).json({ message: 'OTP expired. Please request a new OTP.' })
+
+  const now = new Date()
+  const expiryWithBuffer = new Date(otpRecord.expiresAt.getTime() - 30000)
+
+  if (expiryWithBuffer < now) {
+    res.status(400).json({ message: 'OTP expired. Please request a new OTP.', expired: true })
     return
   }
   // Increment attempts
@@ -274,12 +280,20 @@ export const verifyEmailOTP = async (req: Request, res: Response): Promise<void>
       { upsert: true, new: true },
     )
     if (!otpUser) {
-      res.status(400).json({ message: 'Failed to verify OTP' })
+      res.status(400).json({ message: 'Failed to verify OTP', verification: false })
       return
     }
     // Delete OTP record
     await OTP.deleteOne({ email, otp })
-    res.status(200).json({ message: 'OTP verified successfully', otpUser })
+    // eslint-disable-next-line no-undef
+    const JWT_SECRET = process.env.JWT_SECRET as string
+    // eslint-disable-next-line no-undef
+    const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET as string
+    const token = generateJwtToken(otpUser._id as string, JWT_SECRET, '1h')
+    const refreshToken = generateJwtToken(otpUser._id as string, JWT_REFRESH_SECRET, '30d')
+    res.status(200).json({ message: 'OTP verified successfully', otpUser, token, refreshToken })
+    res.cookie('refresh_token', refreshToken, cookieOptions)
+    return
   } catch (error) {
     res.status(500).json({ message: 'Something went wrong! please try again later', error })
     return
