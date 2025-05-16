@@ -1,7 +1,7 @@
 import jwt, { type JwtPayload } from 'jsonwebtoken'
 import type { Request, Response, NextFunction } from 'express'
 import config from '../config'
-import { respond } from '@/utils/api-response.utils'
+import { respond } from '../utils/api-response.utils'
 
 declare module 'express' {
   export interface Request {
