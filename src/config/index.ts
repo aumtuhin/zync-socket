@@ -16,4 +16,7 @@ export default {
     pass: process.env.EMAIL_PASS as string,
     service: process.env.EMAIL_SERVICE as string,
   },
+  redis: {
+    uri: process.env.REDIS_URL as string,
+  },
 }

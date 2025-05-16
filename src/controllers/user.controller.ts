@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import type { Request, Response } from 'express'
 import userService from '../services/user.service'
 import { respond } from '../utils/api-response.utils'
@@ -12,7 +13,7 @@ export const userProfile = async (req: Request, res: Response): Promise<void> =>
     respond.success(res, { message: 'User profile retrieved successfully', user })
     return
   } catch (error) {
-    respond.error(res, 'Failed to retrieve user profile', 500)
+    respond.error(res, 'User not found', 404)
     return
   }
 }
