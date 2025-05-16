@@ -18,5 +18,9 @@ export default {
   },
   redis: {
     uri: process.env.REDIS_URL as string,
+    host: process.env.REDIS_HOST as string,
+    username: process.env.REDIS_USERNAME as string,
+    password: process.env.REDIS_PASSWORD as string,
+    port: process.env.REDIS_PORT as string,
   },
 }

@@ -3,27 +3,32 @@
 import { createClient } from 'redis'
 import config from '../config'
 
-const redisClient = createClient({
-  url: config.redis.uri,
+const client = createClient({
+  username: config.redis.username,
+  password: config.redis.password,
+  socket: {
+    host: config.redis.host,
+    port: Number(config.redis.port),
+  },
 })
 
-redisClient.on('error', (err) => console.error('Redis Client Error', err))
+client.on('error', (err) => console.error('Redis Client Error', err))
 
 const connectRedis = async () => {
-  await redisClient.connect()
+  await client.connect()
 }
 connectRedis()
 
 export default {
   get: async (key: string) => {
-    const data = await redisClient.get(key)
+    const data = await client.get(key)
     return data ? JSON.parse(data) : null
   },
   set: async (key: string, value: unknown, ttl?: number) => {
-    await redisClient.set(key, JSON.stringify(value))
-    if (ttl) await redisClient.expire(key, ttl)
+    await client.set(key, JSON.stringify(value))
+    if (ttl) await client.expire(key, ttl)
   },
   del: async (key: string) => {
-    await redisClient.del(key)
+    await client.del(key)
   },
 }

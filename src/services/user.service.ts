@@ -12,7 +12,6 @@ const getUserProfile = async (userId: string | JwtPayload): Promise<IOTPUser> =>
 
   const user = await OTPUser.findById(userId) // Exclude password field
   if (!user) throw new Error('User not found')
-
   await cache.set(cacheKey, user, 300)
   return user
 }
