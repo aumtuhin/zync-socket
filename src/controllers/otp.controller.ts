@@ -18,7 +18,7 @@ export const sendSmsOTP = async (req: Request, res: Response): Promise<void> => 
     }
     respond.success(res, { message: 'OTP sent successfully' })
   } catch (error) {
-    respond.error(res, 'Failed to send OTP', error)
+    respond.error(res, 'Failed to send OTP')
   }
 }
 
@@ -43,7 +43,7 @@ export const verifyPhoneOTP = async (req: Request, res: Response): Promise<void>
       refreshToken,
     })
   } catch (error) {
-    respond.error(res, 'Failed to verify OTP', error)
+    respond.error(res, 'Failed to verify OTP')
   }
 }
 
@@ -54,7 +54,7 @@ export const sendEmailOTP = async (req: Request, res: Response): Promise<void> =
     await otpService.sendEmailOTP(email)
     respond.success(res, { message: 'OTP sent successfully' })
   } catch (error) {
-    respond.error(res, 'Failed to send OTP', error)
+    respond.error(res, 'Failed to send OTP')
   }
 }
 
@@ -74,6 +74,6 @@ export const verifyEmailOTP = async (req: Request, res: Response): Promise<void>
       refreshToken,
     })
   } catch (error) {
-    respond.error(res, 'Failed to verify OTP', error)
+    respond.error(res, 'Failed to verify OTP')
   }
 }

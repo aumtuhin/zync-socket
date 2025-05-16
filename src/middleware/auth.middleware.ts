@@ -1,28 +1,26 @@
-/* eslint-disable no-undef */
 import jwt, { type JwtPayload } from 'jsonwebtoken'
 import type { Request, Response, NextFunction } from 'express'
+import config from '../config'
+import { respond } from '@/utils/api-response.utils'
 
 declare module 'express' {
-  // eslint-disable-next-line no-unused-vars
-  interface Request {
+  export interface Request {
     userId?: string | JwtPayload
   }
 }
 
-const JWT_SECRET = process.env.JWT_SECRET as string
-
 export const verifyAccessToken = (req: Request, res: Response, next: NextFunction) => {
   const token = req.header('Authorization')?.replace('Bearer ', '')
   if (!token) {
-    res.status(401).json({ message: 'Access token is missing', authorized: false })
+    respond.error(res, 'Access token is missing', 401)
     return
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload
+    const decoded = jwt.verify(token, config.jwt.secret) as JwtPayload
     req.userId = decoded.id // Attach decoded user data to the request
     next() // Proceed to the next handler
   } catch (error) {
-    res.status(403).json({ message: 'Invalid or expired access token', authorized: false, error })
+    respond.error(res, 'Invalid or expired access token', 403)
   }
 }

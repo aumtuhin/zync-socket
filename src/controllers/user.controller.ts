@@ -1,47 +1,42 @@
 import type { Request, Response } from 'express'
-
-import User from '../models/User'
-import OTPUser from '../models/OTP-User'
+import userService from '../services/user.service'
+import { respond } from '../utils/api-response.utils'
 
 export const userProfile = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = req.userId // Get user ID from decoded JWT payload
-    const user = await User.findById(userId).select('-password') // Exclude password field
-    if (!user) {
-      res.status(404).json({ message: 'User not found' })
+    if (!req.userId) {
+      respond.error(res, 'User ID is required', 401)
       return
     }
-    res.json({ user })
+    const user = await userService.getUserProfile(req.userId)
+    respond.success(res, { message: 'User profile retrieved successfully', user })
     return
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error })
+    respond.error(res, 'Failed to retrieve user profile', 500)
+    return
   }
 }
 
 export const completeProfile = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = req.userId // Get user ID from decoded JWT payload
+    const userId = req.userId
     const { fullName, username } = req.body
-
-    // Validate input
-    if (!fullName || !username) {
-      res.status(400).json({ message: 'Full name and username are required' })
+    if (!userId) {
+      respond.error(res, 'User ID is required', 401)
       return
     }
-
-    // Update user profile
-    const updatedUser = await OTPUser.findByIdAndUpdate(
-      userId,
-      { fullName, username, profileComplete: true }, // Mark profile as completed
-    ).select('-password') // Exclude password field
-
+    const updatedUser = await userService.completeProfile(userId, fullName, username)
     if (!updatedUser) {
-      res.status(404).json({ message: 'User not found' })
+      respond.error(res, 'Failed to update profile', 404)
       return
     }
 
-    res.json({ message: 'Profile updated successfully', user: updatedUser })
+    respond.success(res, {
+      message: 'Profile updated successfully',
+      updatedUser,
+    })
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error })
+    respond.error(res, 'Filed to update profile')
+    return
   }
 }

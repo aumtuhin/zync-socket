@@ -8,8 +8,8 @@ const router = express.Router()
 
 router.post(
   '/complete-profile',
-  completeProfileValidator,
   verifyAccessToken,
+  completeProfileValidator,
   formatValidationErrors,
   completeProfile,
 )

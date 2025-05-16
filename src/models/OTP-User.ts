@@ -3,7 +3,7 @@ import mongoose from 'mongoose'
 export interface IOTPUser extends mongoose.Document {
   fullName?: string
   username?: string
-  profileComplete?: boolean
+  isProfileCompleted?: boolean
   email?: string
   phone?: string
   isVerified: boolean
@@ -23,7 +23,7 @@ const OTPUserSchema = new mongoose.Schema<IOTPUser>(
       unique: true,
       sparse: true,
     },
-    profileComplete: {
+    isProfileCompleted: {
       type: Boolean,
       default: false,
     },
