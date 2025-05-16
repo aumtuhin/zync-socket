@@ -1,6 +1,9 @@
 import mongoose from 'mongoose'
 
 export interface IOTPUser extends mongoose.Document {
+  fullName?: string
+  username?: string
+  profileComplete?: boolean
   email?: string
   phone?: string
   isVerified: boolean
@@ -9,6 +12,21 @@ export interface IOTPUser extends mongoose.Document {
 
 const OTPUserSchema = new mongoose.Schema<IOTPUser>(
   {
+    fullName: {
+      type: String,
+      trim: true,
+    },
+    username: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      unique: true,
+      sparse: true,
+    },
+    profileComplete: {
+      type: Boolean,
+      default: false,
+    },
     email: {
       type: String,
       unique: true,

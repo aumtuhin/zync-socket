@@ -1,32 +1,15 @@
 import type { Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
-import fs from 'node:fs'
-import { resolve } from 'node:path'
-import nodemailer from 'nodemailer'
-import twilio from 'twilio'
-import handlebars from 'handlebars'
+import config from '../config'
 
 import User from '../models/User'
-import OTPUser from '../models/OTP-User'
-import OTP from '../models/OTP'
 
 import { refreshTokenService } from '../services/auth.service'
-import { generateOTP } from '../utils/otp-generator.utils'
-import { generateJwtToken } from '../utils/jwt-token-generator.utils'
 
-// todo move to utils or config
-const cookieOptions = {
-  httpOnly: true,
-  secure: false, // Use `false` in development
-  maxAge: 30 * 24 * 60 * 60 * 1000, // Set cookie expiration date (30 days)
-}
+import { generateJwtToken } from '../utils/jwt-token.utils'
+import { cookieOptionsForRefreshToken } from '../utils/cookie-options.utils'
 
 export const register = async (req: Request, res: Response): Promise<void> => {
-  // eslint-disable-next-line no-undef
-  const JWT_SECRET = process.env.JWT_SECRET as string
-  // eslint-disable-next-line no-undef
-  const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET as string
-
   try {
     const { username, email, password } = req.body
 
@@ -48,10 +31,10 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     await user.save()
 
-    const token = generateJwtToken(user._id as string, JWT_SECRET, '1h')
-    const refreshToken = generateJwtToken(user._id as string, JWT_REFRESH_SECRET, '30d')
+    const token = generateJwtToken(user._id as string, config.jwt.secret, '1h')
+    const refreshToken = generateJwtToken(user._id as string, config.jwt.refreshSecret, '30d')
 
-    res.cookie('refresh_token', refreshToken, cookieOptions)
+    res.cookie('refresh_token', refreshToken, cookieOptionsForRefreshToken)
 
     res.status(201).json({
       message: 'User registered successfully',
@@ -64,11 +47,6 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 }
 
 export const login = async (req: Request, res: Response): Promise<void> => {
-  // eslint-disable-next-line no-undef
-  const JWT_SECRET = process.env.JWT_SECRET as string
-  // eslint-disable-next-line no-undef
-  const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET as string
-
   try {
     const { email, password } = req.body
 
@@ -87,216 +65,14 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Generate token
-    const token = generateJwtToken(user._id as string, JWT_SECRET, '1h')
-    const refreshToken = generateJwtToken(user._id as string, JWT_REFRESH_SECRET, '30d')
+    const token = generateJwtToken(user._id as string, config.jwt.secret, '1h')
+    const refreshToken = generateJwtToken(user._id as string, config.jwt.refreshSecret, '30d')
 
-    res.cookie('refresh_token', refreshToken, cookieOptions)
-
+    res.cookie('refresh_token', refreshToken, cookieOptionsForRefreshToken)
     res.json({ token, refreshToken })
     return
   } catch (error) {
     res.status(500).json({ message: 'Server error', error })
-  }
-}
-
-// Send OTP via Phone
-export const sendPhoneOTP = async (req: Request, res: Response): Promise<void> => {
-  const { phone } = req.body
-  // eslint-disable-next-line no-undef
-  const accountSid = process.env.TWILIO_ACCOUNT_SID as string
-  // eslint-disable-next-line no-undef
-  const authToken = process.env.TWILIO_AUTH_TOKEN as string
-  // eslint-disable-next-line no-undef
-  const serviceSid = process.env.TWILIO_SERVICE_SID as string
-  const client = twilio(accountSid, authToken)
-
-  try {
-    const otpRes = await client.verify.v2
-      .services(serviceSid)
-      .verifications.create({ to: phone, channel: 'sms' })
-    if (otpRes.status === 'pending') {
-      res.status(200).json({ message: 'OTP sent successfully', to: phone })
-    }
-    return
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to send OTP', error })
-    return
-  }
-}
-
-// Verify Phone OTP
-export const verifyPhoneOTP = async (req: Request, res: Response): Promise<void> => {
-  const { phone } = req.body
-  const { otp } = req.body
-
-  // eslint-disable-next-line no-undef
-  const accountSid = process.env.TWILIO_ACCOUNT_SID as string
-  // eslint-disable-next-line no-undef
-  const authToken = process.env.TWILIO_AUTH_TOKEN as string
-  // eslint-disable-next-line no-undef
-  const serviceSid = process.env.TWILIO_SERVICE_SID as string
-  const client = twilio(accountSid, authToken)
-
-  try {
-    const otpRes = await client.verify.v2
-      .services(serviceSid)
-      .verificationChecks.create({ to: phone, code: otp })
-
-    if (otpRes.status === 'approved') {
-      res.status(200).json({ message: 'OTP verified successfully', status: otpRes.status })
-    }
-    return
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to send OTP', error })
-    return
-  }
-}
-
-// Send OTP via Email
-export const sendEmailOTP = async (req: Request, res: Response): Promise<void> => {
-  const { email } = req.body
-  const existingUser = await OTPUser.findOne({
-    email,
-    isVerified: true,
-  })
-
-  if (existingUser) {
-    res.status(400).json({
-      error: 'User already exists and is verified',
-      userExists: true,
-    })
-    return
-  }
-
-  // eslint-disable-next-line no-undef
-  const EMAIL_USER = process.env.EMAIL_USER as string
-  // eslint-disable-next-line no-undef
-  const EMAIL_PASS = process.env.EMAIL_PASS as string
-  // eslint-disable-next-line no-undef
-  const EMAIL_SERVICE = process.env.EMAIL_SERVICE || 'gmail'
-
-  const otp = generateOTP()
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes from now
-
-  // todo check existing otp and attempts from db, right now only rate limiter is used
-
-  // Delete any existing OTPs for this user
-  try {
-    await OTP.deleteMany({ email })
-  } catch (error) {
-    res.status(500).json({ message: 'Something went wrong! please try again later', error })
-    return
-  }
-
-  try {
-    // Save new OTP to database
-    await OTP.create({ email, otp, expiresAt })
-  } catch (error) {
-    res.status(500).json({ message: 'Something went wrong! please try again later', error })
-    return
-  }
-
-  // eslint-disable-next-line no-undef
-  const templatePath = resolve(process.cwd(), 'src/templates/otp-email.hbs')
-  const templateSource = fs.readFileSync(templatePath, 'utf8')
-  const template = handlebars.compile(templateSource)
-
-  const html = template({
-    otp: otp,
-    expiry: 10,
-  })
-
-  const transporter = nodemailer.createTransport({
-    service: EMAIL_SERVICE,
-    auth: {
-      user: EMAIL_USER,
-      pass: EMAIL_PASS,
-    },
-  })
-
-  const mailOptions = {
-    from: `"OTP Service" <${EMAIL_USER}>`,
-    to: email,
-    subject: 'Your One-Time Password (OTP)',
-    html: html,
-  }
-
-  try {
-    await transporter.sendMail(mailOptions)
-    res.status(200).json({ message: 'OTP sent successfully', to: email })
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to send OTP. Please try again.', error })
-  }
-}
-
-// Verify Email OTP
-export const verifyEmailOTP = async (req: Request, res: Response): Promise<void> => {
-  const { email, otp } = req.body
-  const existingUser = await OTPUser.findOne({
-    email,
-    isVerified: true,
-  })
-  if (existingUser) {
-    res.status(400).json({
-      error: 'User already exists and is verified',
-      userExists: true,
-    })
-    return
-  }
-  const otpRecord = await OTP.findOne({
-    email,
-    otp,
-  })
-  if (!otpRecord) {
-    res.status(400).json({ message: 'Invalid OTP or OTP expired', invalid: true })
-    return
-  }
-  if (otpRecord.attempts >= 3) {
-    res
-      .status(400)
-      .json({ message: 'Maximum attempts reached. Please request a new OTP.', maxAttempts: true })
-    return
-  }
-
-  const now = new Date()
-  const expiryWithBuffer = new Date(otpRecord.expiresAt.getTime() - 30000)
-
-  if (expiryWithBuffer < now) {
-    res.status(400).json({ message: 'OTP expired. Please request a new OTP.', expired: true })
-    return
-  }
-  // Increment attempts
-  try {
-    await OTP.updateOne({ email, otp }, { $inc: { attempts: 1 } })
-  } catch (error) {
-    res.status(500).json({ message: 'Something went wrong! please try again later', error })
-    return
-  }
-  // Create or update OTPUser
-  try {
-    const otpUser = await OTPUser.findOneAndUpdate(
-      { email },
-      { isVerified: true },
-      { upsert: true, new: true },
-    )
-    if (!otpUser) {
-      res.status(400).json({ message: 'Failed to verify OTP', verification: false })
-      return
-    }
-    // Delete OTP record
-    await OTP.deleteOne({ email, otp })
-    // eslint-disable-next-line no-undef
-    const JWT_SECRET = process.env.JWT_SECRET as string
-    // eslint-disable-next-line no-undef
-    const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET as string
-    const token = generateJwtToken(otpUser._id as string, JWT_SECRET, '1h')
-    const refreshToken = generateJwtToken(otpUser._id as string, JWT_REFRESH_SECRET, '30d')
-    res.status(200).json({ message: 'OTP verified successfully', otpUser, token, refreshToken })
-    res.cookie('refresh_token', refreshToken, cookieOptions)
-    return
-  } catch (error) {
-    res.status(500).json({ message: 'Something went wrong! please try again later', error })
-    return
   }
 }
 

@@ -1,15 +1,13 @@
 import { body } from 'express-validator'
+import { usernameValidator } from './user.validator'
 
 // Common validation messages
 const messages = {
-  username: 'Username must be between 3 and 30 characters.',
-  usernameRequired: 'Username is required.',
   passwordRequired: 'Password is required.',
   password: 'Password must be at least 6 characters long.',
   email: 'Please provide a valid email address',
   emailRequired: 'Email is required',
   phone: 'Please provide a valid phone number with country code (e.g. +1234567890)',
-  contactRequired: 'Either email or phone number is required',
   otp: 'Please provide a valid OTP',
   otpInvalid: 'Invalid OTP',
 }
@@ -25,12 +23,6 @@ const passwordValidator = body('password')
   .withMessage(messages.password)
   .notEmpty()
   .withMessage(messages.passwordRequired)
-
-const usernameValidator = body('username')
-  .isLength({ min: 3, max: 30 })
-  .withMessage(messages.username)
-  .notEmpty()
-  .withMessage(messages.usernameRequired)
 
 const phoneValidator = body('phone')
   .isMobilePhone('any', { strictMode: true })
@@ -48,7 +40,7 @@ export const registerValidator = [usernameValidator, emailValidator, passwordVal
 
 export const loginValidator = [emailValidator, passwordValidator]
 
-export const requestPhoneOTPValidator = [phoneValidator]
+export const requestSmsOTPValidator = [phoneValidator]
 
 export const requestEmailOTPValidator = [emailValidator]
 

@@ -1,5 +1,8 @@
+/* eslint-disable no-undef */
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+
+import { generateJwtToken } from '../utils/jwt-token.utils'
 import User from '../models/User'
 import { config } from 'dotenv'
 
@@ -17,11 +20,8 @@ export const registerUser = async (username: string, email: string, password: st
   const user = new User({ username, email, password: hashedPassword })
   await user.save()
 
-  const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' })
-  const refreshToken = jwt.sign({ id: user._id }, JWT_REFRESH_SECRET, {
-    expiresIn: '7d',
-  })
-
+  const token = generateJwtToken(user._id as string, JWT_SECRET, '1h')
+  const refreshToken = generateJwtToken(user._id as string, JWT_REFRESH_SECRET, '7d')
   return { token, refreshToken }
 }
 
@@ -47,9 +47,7 @@ export const refreshTokenService = async (refreshToken: string) => {
 
   try {
     const decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET) as JwtPayload
-    const newAccessToken = jwt.sign({ id: decoded.id }, JWT_SECRET, {
-      expiresIn: '1h',
-    })
+    const newAccessToken = generateJwtToken(decoded.id, JWT_SECRET, '1h')
     return newAccessToken
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
