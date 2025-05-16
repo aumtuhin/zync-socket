@@ -1,12 +1,7 @@
 import type { Request, Response } from 'express'
-import twilio from 'twilio'
-import config from '../config'
 
-import {
-  sendEmailOTPService,
-  sendSmsOTPService,
-  verifyEmailOTPService,
-} from '../services/otp.service'
+import config from '../config'
+import otpService from '../services/otp.service'
 
 import { generateJwtToken } from '../utils/jwt-token.utils'
 import { cookieOptionsForRefreshToken } from '../utils/cookie-options.utils'
@@ -16,7 +11,7 @@ import { respond } from '../utils/api-response.utils'
 export const sendSmsOTP = async (req: Request, res: Response): Promise<void> => {
   const { phone } = req.body
   try {
-    const isSent = await sendSmsOTPService(phone)
+    const isSent = await otpService.sendSmsOTP(phone)
     if (!isSent) {
       respond.error(res, 'Failed to send OTP')
       return
@@ -32,20 +27,23 @@ export const verifyPhoneOTP = async (req: Request, res: Response): Promise<void>
   const { phone } = req.body
   const { otp } = req.body
 
-  const client = twilio(config.twilio.accountSid, config.twilio.authToken)
-
   try {
-    const otpRes = await client.verify.v2
-      .services(config.twilio.serviceSid)
-      .verificationChecks.create({ to: phone, code: otp })
-
-    if (otpRes.status === 'approved') {
-      res.status(200).json({ message: 'OTP verified successfully', status: otpRes.status })
+    const otpUser = await otpService.verifySmsOTP(phone, otp)
+    if (!otpUser) {
+      respond.error(res, 'Failed to verify OTP')
+      return
     }
-    return
+    const token = generateJwtToken(phone, config.jwt.secret, '1h')
+    const refreshToken = generateJwtToken(phone, config.jwt.refreshSecret, '30d')
+    res.cookie('refresh_token', refreshToken, cookieOptionsForRefreshToken)
+    respond.success(res, {
+      message: 'OTP verified successfully',
+      otpUser,
+      token,
+      refreshToken,
+    })
   } catch (error) {
-    res.status(500).json({ message: 'Failed to send OTP', error })
-    return
+    respond.error(res, 'Failed to verify OTP', error)
   }
 }
 
@@ -53,7 +51,7 @@ export const verifyPhoneOTP = async (req: Request, res: Response): Promise<void>
 export const sendEmailOTP = async (req: Request, res: Response): Promise<void> => {
   const { email } = req.body
   try {
-    await sendEmailOTPService(email)
+    await otpService.sendEmailOTP(email)
     respond.success(res, { message: 'OTP sent successfully' })
   } catch (error) {
     respond.error(res, 'Failed to send OTP', error)
@@ -65,7 +63,7 @@ export const verifyEmailOTP = async (req: Request, res: Response): Promise<void>
   const { email, otp } = req.body
 
   try {
-    const otpUser = await verifyEmailOTPService(email, otp)
+    const otpUser = await otpService.verifyEmailOTP(email, otp)
     const token = generateJwtToken(otpUser._id as string, config.jwt.secret, '1h')
     const refreshToken = generateJwtToken(otpUser._id as string, config.jwt.refreshSecret, '30d')
     res.cookie('refresh_token', refreshToken, cookieOptionsForRefreshToken)

@@ -16,7 +16,7 @@ interface SendEmailOTPResponse {
   expiresAt: Date
 }
 
-export const sendEmailOTPService = async (email: string): Promise<SendEmailOTPResponse> => {
+const sendEmailOTP = async (email: string): Promise<SendEmailOTPResponse> => {
   const otp = generateOTP()
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes from now
 
@@ -50,7 +50,7 @@ export const sendEmailOTPService = async (email: string): Promise<SendEmailOTPRe
   return { email, otp, expiresAt }
 }
 
-export const verifyEmailOTPService = async (email: string, otp: string): Promise<IOTPUser> => {
+const verifyEmailOTP = async (email: string, otp: string): Promise<IOTPUser> => {
   const otpRecord = await OTP.findOne({
     email,
     otp,
@@ -78,11 +78,35 @@ export const verifyEmailOTPService = async (email: string, otp: string): Promise
   return otpUser
 }
 
-export const sendSmsOTPService = async (phone: string): Promise<boolean> => {
+const sendSmsOTP = async (phone: string): Promise<boolean> => {
   const client = twilio(config.twilio.accountSid, config.twilio.authToken)
   const otpRes = await client.verify.v2
     .services(config.twilio.serviceSid)
     .verifications.create({ to: phone, channel: 'sms' })
 
   return otpRes.status === 'pending'
+}
+
+const verifySmsOTP = async (phone: string, otp: string): Promise<IOTPUser | undefined> => {
+  const client = twilio(config.twilio.accountSid, config.twilio.authToken)
+  const otpRes = await client.verify.v2
+    .services(config.twilio.serviceSid)
+    .verificationChecks.create({ to: phone, code: otp })
+
+  if (otpRes.status === 'approved') {
+    const otpUser = await OTPUser.findOneAndUpdate(
+      { phone },
+      { isVerified: true },
+      { upsert: true, new: true },
+    )
+    return otpUser
+  }
+  return undefined
+}
+
+export default {
+  sendEmailOTP,
+  verifyEmailOTP,
+  sendSmsOTP,
+  verifySmsOTP,
 }
