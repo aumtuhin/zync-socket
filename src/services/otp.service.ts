@@ -7,8 +7,8 @@ import twilio from 'twilio'
 
 import config from '../config'
 import { generateOTP } from '../utils/otp-generator.utils'
-import OTP from '../models/OTP'
-import OTPUser, { type IOTPUser } from '../models/OTP-User'
+import OTP from '../models/otp.model'
+import OTPUser, { type IOTPUser } from '../models/otp-user.model'
 
 interface SendEmailOTPResponse {
   email: string

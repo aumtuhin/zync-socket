@@ -13,7 +13,7 @@ import otpRoutes from './routes/v1/otp.routes'
 
 // Middleware
 // eslint-disable-next-line no-unused-vars
-import { apiKeyMiddleware } from './middleware/apiKey.middleware'
+import { apiKeyMiddleware } from './middleware/api-key.middleware'
 
 // Utils & Config
 import { connectDB } from './config/db.config'

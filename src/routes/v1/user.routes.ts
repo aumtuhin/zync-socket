@@ -2,7 +2,7 @@ import express from 'express'
 import { verifyAccessToken } from '../../middleware/auth.middleware'
 import { userProfile, completeProfile } from '../../controllers/user.controller'
 import { completeProfileValidator } from '../../validators/user.validator'
-import { formatValidationErrors } from '../../middleware/errorFormatter.middleware'
+import { formatValidationErrors } from '../../middleware/error-formatter.middleware'
 
 const router = express.Router()
 

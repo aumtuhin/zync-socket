@@ -1,7 +1,7 @@
 import express from 'express'
 import { register, login, refreshToken } from '../../controllers/auth.controller'
 import { loginValidator, registerValidator } from '../../validators/auth.validator'
-import { formatValidationErrors } from '../../middleware/errorFormatter.middleware'
+import { formatValidationErrors } from '../../middleware/error-formatter.middleware'
 
 const router = express.Router()
 

@@ -1,5 +1,5 @@
 import type { JwtPayload } from 'jsonwebtoken'
-import OTPUser, { type IOTPUser } from '../models/OTP-User'
+import OTPUser, { type IOTPUser } from '../models/otp-user.model'
 import cache from './cache.service'
 
 const getUserProfile = async (userId: string | JwtPayload): Promise<IOTPUser> => {

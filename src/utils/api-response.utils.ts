@@ -9,4 +9,11 @@ export const respond = {
       success: false,
       message,
     }),
+
+  validationError: (res: Response, errors: { array(): unknown[] }) =>
+    res.status(422).json({
+      success: false,
+      message: 'Validation Error',
+      errors: errors.array(),
+    }),
 }
