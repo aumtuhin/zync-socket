@@ -1,8 +1,8 @@
 import type { JwtPayload } from 'jsonwebtoken'
-import OTPUser, { type IOTPUser } from '../models/otp-user.model'
+import User, { type IUser } from '../models/user.model'
 import cache from './cache.service'
 
-const getUserProfile = async (userId: string | JwtPayload): Promise<IOTPUser> => {
+const getUserProfile = async (userId: string | JwtPayload): Promise<IUser> => {
   if (!userId) throw new Error('User ID is required')
 
   const cacheKey = `user:${userId}`
@@ -10,7 +10,7 @@ const getUserProfile = async (userId: string | JwtPayload): Promise<IOTPUser> =>
   const cachedUser = await cache.get(cacheKey)
   if (cachedUser) return cachedUser
 
-  const user = await OTPUser.findById(userId) // Exclude password field
+  const user = await User.findById(userId) // Exclude password field
   if (!user) throw new Error('User not found')
   await cache.set(cacheKey, user, 300)
   return user
@@ -20,9 +20,9 @@ const completeProfile = async (
   userId: string | JwtPayload,
   fullName: string,
   username: string,
-): Promise<IOTPUser> => {
+): Promise<IUser> => {
   const cacheKey = `user:${userId}`
-  const updatedUser = await OTPUser.findByIdAndUpdate(
+  const updatedUser = await User.findByIdAndUpdate(
     userId,
     {
       fullName,

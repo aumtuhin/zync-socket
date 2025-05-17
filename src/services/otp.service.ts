@@ -8,7 +8,7 @@ import twilio from 'twilio'
 import config from '../config'
 import { generateOTP } from '../utils/otp-generator.utils'
 import OTP from '../models/otp.model'
-import OTPUser, { type IOTPUser } from '../models/otp-user.model'
+import User, { type IUser } from '../models/user.model'
 
 interface SendEmailOTPResponse {
   email: string
@@ -50,7 +50,7 @@ const sendEmailOTP = async (email: string): Promise<SendEmailOTPResponse> => {
   return { email, otp, expiresAt }
 }
 
-const verifyEmailOTP = async (email: string, otp: string): Promise<IOTPUser> => {
+const verifyEmailOTP = async (email: string, otp: string): Promise<IUser> => {
   const otpRecord = await OTP.findOne({
     email,
     otp,
@@ -67,7 +67,7 @@ const verifyEmailOTP = async (email: string, otp: string): Promise<IOTPUser> => 
 
   await OTP.updateOne({ email, otp }, { $inc: { attempts: 1 } })
 
-  const otpUser = await OTPUser.findOneAndUpdate(
+  const user = await User.findOneAndUpdate(
     { email },
     { isVerified: true },
     { upsert: true, new: true },
@@ -75,7 +75,7 @@ const verifyEmailOTP = async (email: string, otp: string): Promise<IOTPUser> => 
   // Delete OTP record after successful verification
   await OTP.deleteOne({ email, otp })
 
-  return otpUser
+  return user
 }
 
 const sendSmsOTP = async (phone: string): Promise<boolean> => {
@@ -87,19 +87,19 @@ const sendSmsOTP = async (phone: string): Promise<boolean> => {
   return otpRes.status === 'pending'
 }
 
-const verifySmsOTP = async (phone: string, otp: string): Promise<IOTPUser | undefined> => {
+const verifySmsOTP = async (phone: string, otp: string): Promise<IUser | undefined> => {
   const client = twilio(config.twilio.accountSid, config.twilio.authToken)
   const otpRes = await client.verify.v2
     .services(config.twilio.serviceSid)
     .verificationChecks.create({ to: phone, code: otp })
 
   if (otpRes.status === 'approved') {
-    const otpUser = await OTPUser.findOneAndUpdate(
+    const user = await User.findOneAndUpdate(
       { phone },
       { isVerified: true },
       { upsert: true, new: true },
     )
-    return otpUser
+    return user
   }
   return undefined
 }

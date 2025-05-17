@@ -28,8 +28,8 @@ export const verifyPhoneOTP = async (req: Request, res: Response): Promise<void>
   const { otp } = req.body
 
   try {
-    const otpUser = await otpService.verifySmsOTP(phone, otp)
-    if (!otpUser) {
+    const user = await otpService.verifySmsOTP(phone, otp)
+    if (!user) {
       respond.error(res, 'Failed to verify OTP')
       return
     }
@@ -38,7 +38,7 @@ export const verifyPhoneOTP = async (req: Request, res: Response): Promise<void>
     res.cookie('refresh_token', refreshToken, cookieOptionsForRefreshToken)
     respond.success(res, {
       message: 'OTP verified successfully',
-      otpUser,
+      user,
       token,
       refreshToken,
     })
@@ -63,13 +63,13 @@ export const verifyEmailOTP = async (req: Request, res: Response): Promise<void>
   const { email, otp } = req.body
 
   try {
-    const otpUser = await otpService.verifyEmailOTP(email, otp)
-    const token = generateJwtToken(otpUser._id as string, config.jwt.secret, '1h')
-    const refreshToken = generateJwtToken(otpUser._id as string, config.jwt.refreshSecret, '30d')
+    const user = await otpService.verifyEmailOTP(email, otp)
+    const token = generateJwtToken(user._id as string, config.jwt.secret, '1h')
+    const refreshToken = generateJwtToken(user._id as string, config.jwt.refreshSecret, '30d')
     res.cookie('refresh_token', refreshToken, cookieOptionsForRefreshToken)
     respond.success(res, {
       message: 'OTP verified successfully',
-      otpUser,
+      user,
       token,
       refreshToken,
     })

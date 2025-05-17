@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 
 import { generateJwtToken } from '../utils/jwt-token.utils'
-import User from '../models/User'
+import User from '../models/user.model'
 import { config } from 'dotenv'
 
 config()
@@ -32,6 +32,7 @@ export const loginUser = async (email: string, password: string) => {
   const user = await User.findOne({ email })
   if (!user) throw new Error('User not found')
 
+  if (!user.password) throw new Error('Password not set')
   const isMatch = await bcrypt.compare(password, user.password)
   if (!isMatch) throw new Error('Invalid credentials')
 

@@ -1,16 +1,17 @@
 import mongoose from 'mongoose'
 
-export interface IOTPUser extends mongoose.Document {
+export interface IUser extends mongoose.Document {
   fullName?: string
   username?: string
   isProfileCompleted?: boolean
   email?: string
   phone?: string
+  password?: string
   isVerified: boolean
   createdAt: Date
 }
 
-const OTPUserSchema = new mongoose.Schema<IOTPUser>(
+const UserSchema = new mongoose.Schema<IUser>(
   {
     fullName: {
       type: String,
@@ -39,6 +40,10 @@ const OTPUserSchema = new mongoose.Schema<IOTPUser>(
       unique: true,
       sparse: true,
     },
+    password: {
+      type: String,
+      select: false,
+    },
     isVerified: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now, expires: '30d' }, // Auto-delete unverified after 30 days
   },
@@ -47,4 +52,4 @@ const OTPUserSchema = new mongoose.Schema<IOTPUser>(
   },
 )
 
-export default mongoose.model<IOTPUser>('OTPUser', OTPUserSchema)
+export default mongoose.model<IUser>('User', UserSchema)

@@ -2,7 +2,7 @@ import type { Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
 import config from '../config'
 
-import User from '../models/User'
+import User from '../models/user.model'
 
 import { refreshTokenService } from '../services/auth.service'
 
@@ -55,6 +55,11 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     if (!user) {
       res.status(400).json({ message: 'Invalid credentials' })
       return // Ensure to return after response
+    }
+
+    if (!user.password) {
+      res.status(400).json({ message: 'Password not set' })
+      return
     }
 
     // Compare passwords
