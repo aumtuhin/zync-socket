@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
-import config from '@/config'
+import config from '../config'
 
 import User from '../models/user.model'
 
@@ -54,7 +54,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const user = await User.findOne({ email })
     if (!user) {
       res.status(400).json({ message: 'Invalid credentials' })
-      return // Ensure to return after response
+      return
     }
 
     if (!user.password) {
