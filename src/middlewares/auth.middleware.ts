@@ -24,20 +24,21 @@ export const verifyAccessToken = (req: Request, res: Response, next: NextFunctio
     req.userId = decoded.id // Attach decoded user data to the request
     next() // Proceed to the next handler
   } catch (error) {
-    respond.error(res, 'Invalid or expired access token', 403)
+    const message = error instanceof Error ? error.message : 'Invalid or expired access token'
+    respond.error(res, message, 403)
   }
 }
 
 export const authenticateSocket = async (socket: Socket, next: (err?: Error) => void) => {
   try {
     const token = socket.handshake.auth.token
-    console.log('Socket token:', token)
     if (!token) return next(new Error('Authentication error'))
 
     const decoded = jwt.verify(token, config.jwt.secret) as { userId: string }
     ;(socket as SocketWithUser).user = { _id: decoded.userId }
     next()
-  } catch (err) {
-    next(new Error('Authentication error'))
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Authentication error'
+    next(new Error(message))
   }
 }

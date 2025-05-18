@@ -11,14 +11,14 @@ import cookieParser from 'cookie-parser'
 import authRoutes from './routes/v1/auth.routes'
 import userRouter from './routes/v1/user.routes'
 import otpRoutes from './routes/v1/otp.routes'
+import contactRoutes from './routes/v1/contact.routes'
 
+// Middlewares & Configs
 import { apiKeyMiddleware } from './middlewares/api-key.middleware'
 import { connectDB } from './config/db.config'
+import config from './config'
 import { corsOptions } from './config/cors.config'
 import { initSocket } from './sockets'
-
-// eslint-disable-next-line no-undef
-const PORT = process.env.PORT || 8000
 
 const app = express()
 app.use(cors(corsOptions))
@@ -42,8 +42,8 @@ initSocket(server)
 app.use('/api/v1/auth', authRoutes)
 app.use('/api/v1/user', userRouter)
 app.use('/api/v1/otp', otpRoutes)
+app.use('/api/v1/user/contacts', contactRoutes)
 
-server.listen(PORT, () => {
-  // eslint-disable-next-line no-undef, no-console
-  console.log(`Server running at PORT ${PORT}`)
+server.listen(config.port, () => {
+  console.log(`Server is running on port ${config.port}`)
 })

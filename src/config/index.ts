@@ -1,5 +1,6 @@
 /* eslint-disable no-undef */
 export default {
+  port: process.env.PORT || 8000,
   jwt: {
     secret: process.env.JWT_SECRET as string,
     refreshSecret: process.env.JWT_REFRESH_SECRET as string,

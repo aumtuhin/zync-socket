@@ -6,5 +6,5 @@
   },
   "eslint.validate": ["javascript", "typescript"],
   "prettier.requireConfig": true,
-  "cSpell.words": ["frontends", "INITDB", "IOTP", "maxlength", "tsparser"]
+  "cSpell.words": ["frontends", "INITDB", "IOTP", "maxlength", "tsparser", "Zync"]
 }

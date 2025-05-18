@@ -12,7 +12,7 @@ const messages = {
   otpInvalid: 'Invalid OTP',
 }
 
-const emailValidator = body('email')
+export const emailValidator = body('email')
   .isEmail()
   .withMessage(messages.email)
   .notEmpty()
@@ -24,7 +24,7 @@ const passwordValidator = body('password')
   .notEmpty()
   .withMessage(messages.passwordRequired)
 
-const phoneValidator = body('phone')
+export const phoneValidator = body('phone')
   .isMobilePhone('any', { strictMode: true })
   .withMessage('Please provide a valid phone number.')
   .notEmpty()
