@@ -10,8 +10,8 @@ import {
   requestEmailOTPValidator,
   verifyOTPValidator,
 } from '../../validators/auth.validator'
-import { formatValidationErrors } from '../../middleware/error-formatter.middleware'
-import { otpLimiter } from '../../middleware/rate-limiter.middleware'
+import { formatValidationErrors } from '../../middlewares/error-formatter.middleware'
+import { otpLimiter } from '../../middlewares/rate-limiter.middleware'
 
 const router = express.Router()
 

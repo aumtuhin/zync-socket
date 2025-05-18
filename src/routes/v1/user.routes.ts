@@ -1,8 +1,8 @@
 import express from 'express'
-import { verifyAccessToken } from '../../middleware/auth.middleware'
+import { verifyAccessToken } from '../../middlewares/auth.middleware'
 import { userProfile, completeProfile } from '../../controllers/user.controller'
 import { completeProfileValidator } from '../../validators/user.validator'
-import { formatValidationErrors } from '../../middleware/error-formatter.middleware'
+import { formatValidationErrors } from '../../middlewares/error-formatter.middleware'
 
 const router = express.Router()
 

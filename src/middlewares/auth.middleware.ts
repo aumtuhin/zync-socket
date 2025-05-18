@@ -1,5 +1,8 @@
 import jwt, { type JwtPayload } from 'jsonwebtoken'
 import type { Request, Response, NextFunction } from 'express'
+import type { Socket } from 'socket.io'
+
+import type { SocketWithUser } from '../interfaces/chat.interface'
 import config from '../config'
 import { respond } from '../utils/api-response.utils'
 
@@ -22,5 +25,19 @@ export const verifyAccessToken = (req: Request, res: Response, next: NextFunctio
     next() // Proceed to the next handler
   } catch (error) {
     respond.error(res, 'Invalid or expired access token', 403)
+  }
+}
+
+export const authenticateSocket = async (socket: Socket, next: (err?: Error) => void) => {
+  try {
+    const token = socket.handshake.auth.token
+    console.log('Socket token:', token)
+    if (!token) return next(new Error('Authentication error'))
+
+    const decoded = jwt.verify(token, config.jwt.secret) as { userId: string }
+    ;(socket as SocketWithUser).user = { _id: decoded.userId }
+    next()
+  } catch (err) {
+    next(new Error('Authentication error'))
   }
 }

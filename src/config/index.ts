@@ -23,4 +23,7 @@ export default {
     password: process.env.REDIS_PASSWORD as string,
     port: process.env.REDIS_PORT as string,
   },
+  socket: {
+    clientUrl: process.env.SOCKET_CLIENT_URL as string,
+  },
 }
