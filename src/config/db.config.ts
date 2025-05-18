@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-/* eslint-disable no-undef */
 import mongoose from 'mongoose'
 const MONGO_URI = process.env.MONGO_URI as string
 export const connectDB = async () => {

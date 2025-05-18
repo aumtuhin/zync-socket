@@ -1,4 +1,3 @@
-// services/contact.service.ts
 import type { JwtPayload } from 'jsonwebtoken'
 import User from '../models/user.model'
 
@@ -14,6 +13,8 @@ const addContact = async (
   if (String(contact._id) === String(userId)) {
     throw new Error('You cannot add yourself as a contact')
   }
+
+  console.log('Contact:', contact)
 
   const existingContact = await User.findOne({
     _id: userId,

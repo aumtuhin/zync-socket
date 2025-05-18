@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import fs from 'node:fs'
 import { resolve } from 'node:path'
 import nodemailer from 'nodemailer'
@@ -29,22 +28,22 @@ const sendEmailOTP = async (email: string): Promise<SendEmailOTPResponse> => {
 
   const html = template({
     otp: otp,
-    expiry: 10,
+    expiry: 10
   })
 
   const transporter = nodemailer.createTransport({
     service: config.nodeMailer.service,
     auth: {
       user: config.nodeMailer.user,
-      pass: config.nodeMailer.pass,
-    },
+      pass: config.nodeMailer.pass
+    }
   })
 
   const mailOptions = {
     from: `"OTP Service" <${config.nodeMailer.user}>`,
     to: email,
     subject: 'Your One-Time Password (OTP)',
-    html: html,
+    html: html
   }
   await transporter.sendMail(mailOptions)
   return { email, otp, expiresAt }
@@ -53,7 +52,7 @@ const sendEmailOTP = async (email: string): Promise<SendEmailOTPResponse> => {
 const verifyEmailOTP = async (email: string, otp: string): Promise<IUser> => {
   const otpRecord = await OTP.findOne({
     email,
-    otp,
+    otp
   })
   if (!otpRecord) throw new Error('Invalid OTP')
 
@@ -70,7 +69,7 @@ const verifyEmailOTP = async (email: string, otp: string): Promise<IUser> => {
   const user = await User.findOneAndUpdate(
     { email },
     { isVerified: true },
-    { upsert: true, new: true },
+    { upsert: true, new: true }
   )
   // Delete OTP record after successful verification
   await OTP.deleteOne({ email, otp })
@@ -97,7 +96,7 @@ const verifySmsOTP = async (phone: string, otp: string): Promise<IUser | undefin
     const user = await User.findOneAndUpdate(
       { phone },
       { isVerified: true },
-      { upsert: true, new: true },
+      { upsert: true, new: true }
     )
     return user
   }
@@ -108,5 +107,5 @@ export default {
   sendEmailOTP,
   verifyEmailOTP,
   sendSmsOTP,
-  verifySmsOTP,
+  verifySmsOTP
 }

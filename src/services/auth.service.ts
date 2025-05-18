@@ -1,34 +1,28 @@
-/* eslint-disable no-undef */
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-
 import { generateJwtToken } from '../utils/jwt-token.utils'
 import User from '../models/user.model'
-import { config } from 'dotenv'
-
-config()
+import config from '../config'
 
 interface JwtPayload {
   id: string
 }
 
 export const registerUser = async (username: string, email: string, password: string) => {
-  const JWT_SECRET = process.env.JWT_SECRET as string
-  const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET as string
-
   const hashedPassword = await bcrypt.hash(password, 10)
   const user = new User({ username, email, password: hashedPassword })
   await user.save()
 
-  const token = generateJwtToken(user._id as string, JWT_SECRET, '1h')
-  const refreshToken = generateJwtToken(user._id as string, JWT_REFRESH_SECRET, '7d')
+  const token = generateJwtToken(user._id as string, config.jwt.secret, config.jwt.expiresIn)
+  const refreshToken = generateJwtToken(
+    user._id as string,
+    config.jwt.refreshSecret,
+    config.jwt.refreshExpiresIn
+  )
   return { token, refreshToken }
 }
 
 export const loginUser = async (email: string, password: string) => {
-  const JWT_SECRET = process.env.JWT_SECRET as string
-  const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET as string
-
   const user = await User.findOne({ email })
   if (!user) throw new Error('User not found')
 
@@ -36,19 +30,24 @@ export const loginUser = async (email: string, password: string) => {
   const isMatch = await bcrypt.compare(password, user.password)
   if (!isMatch) throw new Error('Invalid credentials')
 
-  const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' })
-  const refreshToken = jwt.sign({ id: user._id }, JWT_REFRESH_SECRET, { expiresIn: '7d' })
+  const token = generateJwtToken(user._id as string, config.jwt.secret, config.jwt.expiresIn)
+  const refreshToken = generateJwtToken(
+    user._id as string,
+    config.jwt.refreshSecret,
+    config.jwt.refreshExpiresIn
+  )
 
   return { token, refreshToken }
 }
 
 export const refreshTokenService = async (refreshToken: string) => {
-  const JWT_SECRET = process.env.JWT_SECRET as string
-  const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET as string
-
   try {
-    const decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET) as JwtPayload
-    const newAccessToken = generateJwtToken(decoded.id, JWT_SECRET, '1h')
+    const decoded = jwt.verify(refreshToken, config.jwt.refreshSecret) as JwtPayload
+    const newAccessToken = generateJwtToken(
+      decoded.id,
+      config.jwt.secret,
+      config.jwt.expiresIn as jwt.SignOptions['expiresIn']
+    )
     return newAccessToken
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {

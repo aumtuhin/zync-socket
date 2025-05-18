@@ -40,7 +40,7 @@ export const verifyPhoneOTP = async (req: Request, res: Response): Promise<void>
       message: 'OTP verified successfully',
       user,
       token,
-      refreshToken,
+      refreshToken
     })
   } catch (error) {
     respond.error(res, 'Failed to verify OTP')
@@ -71,7 +71,7 @@ export const verifyEmailOTP = async (req: Request, res: Response): Promise<void>
       message: 'OTP verified successfully',
       user,
       token,
-      refreshToken,
+      refreshToken
     })
   } catch (error) {
     respond.error(res, 'Failed to verify OTP')

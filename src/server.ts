@@ -14,11 +14,11 @@ import otpRoutes from './routes/v1/otp.routes'
 import contactRoutes from './routes/v1/contact.routes'
 
 // Middlewares & Configs
-import { apiKeyMiddleware } from './middlewares/api-key.middleware'
 import { connectDB } from './config/db.config'
 import config from './config'
 import { corsOptions } from './config/cors.config'
 import { initSocket } from './sockets'
+import { socketHandler } from './sockets/socket.handler'
 
 const app = express()
 app.use(cors(corsOptions))
@@ -27,18 +27,17 @@ app.use(express.json())
 app.use(helmet())
 app.use(morgan('dev'))
 
-// Routes
-// app.use('/api/v1', apiKeyMiddleware) // Apply to ALL /api/v1 routes
-app.get('/', (req, res) => {
-  res.send('Welcome to the API')
-})
-
 // MongoDB Connection
 connectDB()
 
 const server = createServer(app)
-initSocket(server)
+const io = initSocket(server)
+io.on('connection', (socket) => socketHandler(io, socket))
 
+// Routes
+app.get('/', (req, res) => {
+  res.send('Welcome to the API')
+})
 app.use('/api/v1/auth', authRoutes)
 app.use('/api/v1/user', userRouter)
 app.use('/api/v1/otp', otpRoutes)

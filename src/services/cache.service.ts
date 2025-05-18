@@ -1,5 +1,3 @@
-/* eslint-disable no-undef */
-/* eslint-disable no-console */
 import { createClient } from 'redis'
 import config from '../config'
 
@@ -8,8 +6,8 @@ const client = createClient({
   password: config.redis.password,
   socket: {
     host: config.redis.host,
-    port: Number(config.redis.port),
-  },
+    port: Number(config.redis.port)
+  }
 })
 
 client.on('error', (err) => console.error('Redis Client Error', err))
@@ -30,5 +28,5 @@ export default {
   },
   del: async (key: string) => {
     await client.del(key)
-  },
+  }
 }

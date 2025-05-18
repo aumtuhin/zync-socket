@@ -1,5 +1,5 @@
 import js from '@eslint/js'
-import tseslint from '@typescript-eslint/eslint-plugin'
+import eslintPluginTs from '@typescript-eslint/eslint-plugin'
 import tsparser from '@typescript-eslint/parser'
 import prettier from 'eslint-config-prettier'
 
@@ -9,21 +9,28 @@ export default [
     files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
       parser: tsparser,
+      ecmaVersion: 'latest',
+      sourceType: 'module',
       parserOptions: {
-        project: './tsconfig.json',
-        ecmaVersion: 'latest',
-        sourceType: 'module',
+        project: './tsconfig.json'
       },
+      globals: {
+        console: 'readonly',
+        process: 'readonly',
+        module: 'readonly',
+        __dirname: 'readonly',
+        require: 'readonly'
+      }
     },
     plugins: {
-      '@typescript-eslint': tseslint,
+      '@typescript-eslint': eslintPluginTs
     },
     rules: {
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
-      'no-console': 'warn',
-      'no-unused-vars': 'warn',
-    },
+      'no-console': 'off',
+      'no-unused-vars': 'warn'
+    }
   },
-  prettier,
+  prettier
 ]

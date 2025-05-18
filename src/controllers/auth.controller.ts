@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
-import config from '../config'
+import config from '@/config'
 
 import User from '../models/user.model'
 
@@ -39,7 +39,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     res.status(201).json({
       message: 'User registered successfully',
       token,
-      refreshToken,
+      refreshToken
     })
   } catch (error) {
     res.status(500).json({ message: 'Server error', error })
