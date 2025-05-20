@@ -8,6 +8,7 @@ export interface IUser extends mongoose.Document {
   phone?: string
   password?: string
   isVerified: boolean
+  avatar?: string
   contacts: mongoose.Types.ObjectId[]
   createdAt: Date
 }
@@ -16,34 +17,39 @@ const UserSchema = new mongoose.Schema<IUser>(
   {
     fullName: {
       type: String,
-      trim: true,
+      trim: true
     },
     username: {
       type: String,
       trim: true,
       lowercase: true,
       unique: true,
-      sparse: true,
+      sparse: true
     },
     isProfileCompleted: {
       type: Boolean,
-      default: false,
+      default: false
     },
     email: {
       type: String,
       unique: true,
       sparse: true,
       trim: true,
-      lowercase: true,
+      lowercase: true
     },
     phone: {
       type: String,
       unique: true,
-      sparse: true,
+      sparse: true
     },
     password: {
       type: String,
-      select: false,
+      select: false
+    },
+    avatar: {
+      type: String,
+      default:
+        'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
     },
     isVerified: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now, expires: '30d' }, // Auto-delete unverified after 30 days
@@ -51,18 +57,18 @@ const UserSchema = new mongoose.Schema<IUser>(
       {
         contactId: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: 'User',
+          ref: 'User'
         },
         fullName: {
           type: String,
-          trim: true,
-        },
-      },
-    ],
+          trim: true
+        }
+      }
+    ]
   },
   {
-    timestamps: true,
-  },
+    timestamps: true
+  }
 )
 
 export default mongoose.model<IUser>('User', UserSchema)

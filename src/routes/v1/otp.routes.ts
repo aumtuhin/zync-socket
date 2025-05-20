@@ -3,12 +3,12 @@ import {
   sendSmsOTP,
   sendEmailOTP,
   verifyPhoneOTP,
-  verifyEmailOTP,
+  verifyEmailOTP
 } from '../../controllers/otp.controller'
 import {
   requestSmsOTPValidator,
   requestEmailOTPValidator,
-  verifyOTPValidator,
+  verifyOTPValidator
 } from '../../validators/auth.validator'
 import { formatValidationErrors } from '../../middlewares/error-formatter.middleware'
 import { otpLimiter } from '../../middlewares/rate-limiter.middleware'
@@ -16,26 +16,20 @@ import { otpLimiter } from '../../middlewares/rate-limiter.middleware'
 const router = express.Router()
 
 router.post('/request-sms', otpLimiter, requestSmsOTPValidator, formatValidationErrors, sendSmsOTP)
-router.post(
-  '/request-email',
-  otpLimiter,
-  requestEmailOTPValidator,
-  formatValidationErrors,
-  sendEmailOTP,
-)
+router.post('/request-email', requestEmailOTPValidator, formatValidationErrors, sendEmailOTP)
 router.post(
   '/verify-sms',
   requestSmsOTPValidator,
   verifyOTPValidator,
   formatValidationErrors,
-  verifyPhoneOTP,
+  verifyPhoneOTP
 )
 router.post(
   '/verify-email',
   requestEmailOTPValidator,
   verifyOTPValidator,
   formatValidationErrors,
-  verifyEmailOTP,
+  verifyEmailOTP
 )
 
 export default router

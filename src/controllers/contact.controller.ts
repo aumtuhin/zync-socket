@@ -12,19 +12,14 @@ export const addContact = async (req: Request, res: Response): Promise<void> => 
       respond.error(res, 'Unauthorized ', 400)
       return
     }
-
-    if ((!fullName && !email) || !phone) {
-      respond.error(res, 'All fields are required', 400)
-      return
-    }
-
     await contactService.addContact(userId, fullName, email, phone)
-    respond.success(res, 'Contact added successfully', 201)
+    respond.success(res, { message: 'Contact added successfully' }, 201)
+    return
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Server error'
     let status: number
     switch (true) {
-      case message === 'User not found':
+      case message === 'User is not Zync a user':
         status = 404
         break
       case message === 'You cannot add yourself as a contact':

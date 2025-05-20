@@ -19,17 +19,23 @@ const getUserProfile = async (userId: string | JwtPayload): Promise<IUser> => {
 const completeProfile = async (
   userId: string | JwtPayload,
   fullName: string,
-  username: string,
+  username: string
 ): Promise<IUser> => {
   const cacheKey = `user:${userId}`
+
+  const usernameExists = await User.findOne({ username })
+  if (usernameExists) {
+    throw new Error('Username already exists')
+  }
+
   const updatedUser = await User.findByIdAndUpdate(
     userId,
     {
       fullName,
       username,
-      isProfileCompleted: true,
+      isProfileCompleted: true
     },
-    { new: true },
+    { new: true }
   )
 
   if (!updatedUser) {
@@ -42,5 +48,5 @@ const completeProfile = async (
 
 export default {
   getUserProfile,
-  completeProfile,
+  completeProfile
 }

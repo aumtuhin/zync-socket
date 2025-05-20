@@ -96,7 +96,7 @@ const verifySmsOTP = async (phone: string, otp: string): Promise<IUser | undefin
     const user = await User.findOneAndUpdate(
       { phone },
       { isVerified: true },
-      { upsert: true, new: true }
+      { upsert: true, new: true, select: '-password' }
     )
     return user
   }

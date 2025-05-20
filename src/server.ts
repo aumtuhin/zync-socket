@@ -38,6 +38,7 @@ io.on('connection', (socket) => socketHandler(io, socket))
 app.get('/', (req, res) => {
   res.send('Welcome to the API')
 })
+
 app.use('/api/v1/auth', authRoutes)
 app.use('/api/v1/user', userRouter)
 app.use('/api/v1/otp', otpRoutes)

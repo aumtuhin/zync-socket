@@ -5,20 +5,18 @@ const addContact = async (
   userId: string | JwtPayload,
   fullName: string,
   email: string,
-  phone: string,
+  phone: string
 ) => {
   const contact = await User.findOne({ $or: [{ email }, { phone }] })
-  if (!contact) throw new Error('User not found')
+  if (!contact) throw new Error('User is not Zync a user')
 
   if (String(contact._id) === String(userId)) {
     throw new Error('You cannot add yourself as a contact')
   }
 
-  console.log('Contact:', contact)
-
   const existingContact = await User.findOne({
     _id: userId,
-    'contacts._id': contact._id,
+    'contacts._id': contact._id
   })
 
   if (existingContact) {
@@ -29,9 +27,9 @@ const addContact = async (
     $addToSet: {
       contacts: {
         _id: contact._id,
-        fullName: fullName,
-      },
-    },
+        fullName: fullName
+      }
+    }
   })
 }
 
@@ -42,5 +40,5 @@ const getContacts = async (userId: string | JwtPayload) => {
 
 export default {
   addContact,
-  getContacts,
+  getContacts
 }

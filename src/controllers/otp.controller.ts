@@ -61,7 +61,6 @@ export const sendEmailOTP = async (req: Request, res: Response): Promise<void> =
 // Verify Email OTP
 export const verifyEmailOTP = async (req: Request, res: Response): Promise<void> => {
   const { email, otp } = req.body
-
   try {
     const user = await otpService.verifyEmailOTP(email, otp)
     const token = generateJwtToken(user._id as string, config.jwt.secret, '1h')

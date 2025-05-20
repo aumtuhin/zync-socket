@@ -34,10 +34,23 @@ export const completeProfile = async (req: Request, res: Response): Promise<void
 
     respond.success(res, {
       message: 'Profile updated successfully',
-      updatedUser,
+      updatedUser
     })
   } catch (error) {
-    respond.error(res, 'Filed to update profile')
+    const message = error instanceof Error ? error.message : 'Server error'
+    let status: number
+    switch (true) {
+      case message === 'User not found':
+        status = 404
+        break
+      case message === 'Username already exists':
+        status = 400
+        break
+      default:
+        status = 500
+        break
+    }
+    respond.error(res, message, status)
     return
   }
 }

@@ -1,22 +1,30 @@
-import mongoose, { Schema, type Document } from 'mongoose'
+import mongoose, { type Document } from 'mongoose'
 
 export interface IMessage extends Document {
-  conversation: mongoose.Types.ObjectId
-  sender: mongoose.Types.ObjectId
+  room: string
+  author: mongoose.Types.ObjectId
   content: string
-  readBy: mongoose.Types.ObjectId[]
-  createdAt: Date
-  updatedAt: Date
+  timestamp: Date
 }
 
-const MessageSchema: Schema = new Schema(
-  {
-    conversation: { type: Schema.Types.ObjectId, ref: 'Conversation', required: true },
-    sender: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    content: { type: String, required: true },
-    readBy: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+const MessageSchema = new mongoose.Schema<IMessage>({
+  room: {
+    type: String,
+    required: true
   },
-  { timestamps: true },
-)
+  author: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  content: {
+    type: String,
+    required: true
+  },
+  timestamp: {
+    type: Date,
+    default: Date.now
+  }
+})
 
 export default mongoose.model<IMessage>('Message', MessageSchema)
