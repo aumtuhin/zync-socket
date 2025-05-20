@@ -9,8 +9,6 @@ export interface IUser extends mongoose.Document {
   password?: string
   isVerified: boolean
   avatar?: string
-  contacts: mongoose.Types.ObjectId[]
-  conversations?: mongoose.Types.ObjectId[]
   createdAt: Date
 }
 
@@ -53,19 +51,7 @@ const UserSchema = new mongoose.Schema<IUser>(
         'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
     },
     isVerified: { type: Boolean, default: false },
-    createdAt: { type: Date, default: Date.now, expires: '30d' }, // Auto-delete unverified after 30 days
-    contacts: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Contact'
-      }
-    ],
-    conversations: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Conversation'
-      }
-    ]
+    createdAt: { type: Date, default: Date.now, expires: '30d' } // Auto-delete unverified after 30 days
   },
   {
     timestamps: true

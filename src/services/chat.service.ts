@@ -19,28 +19,14 @@ const createConversation = async (userId: string | JwtPayload, contactId: string
 }
 
 const getConversations = async (userId: string | JwtPayload) => {
-  const page = 1
-  const limit = 20
+  const conversations = await Conversation.find({ participants: userId })
+    .populate({ path: 'participants', select: 'username avatar email' })
+    .select({ messages: 0 })
+    .sort({ updatedAt: -1 })
+    .lean(true)
 
-  const user = await User.findById(userId).populate({
-    path: 'conversations',
-    options: {
-      sort: { updatedAt: -1 },
-      skip: (page - 1) * limit,
-      limit: limit
-    },
-    select: '-messages',
-    populate: [
-      {
-        path: 'participants',
-        match: { _id: { $ne: userId } },
-        select: 'fullName email phone avatar'
-      }
-    ]
-  })
-
-  if (!user?.conversations) throw new Error('Conversations not found')
-  return user.conversations
+  if (!conversations) throw new Error('Conversations not found')
+  return conversations
 }
 
 export default {
