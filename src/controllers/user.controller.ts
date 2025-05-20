@@ -10,7 +10,7 @@ export const userProfile = async (req: Request, res: Response): Promise<void> =>
       return
     }
     const user = await userService.getUserProfile(req.userId)
-    respond.success(res, { message: 'User profile retrieved successfully', user })
+    respond.success(res, { ...user })
     return
   } catch (error) {
     respond.error(res, 'User not found', 404)

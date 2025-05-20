@@ -18,7 +18,7 @@ export const addContact = async (req: Request, res: Response): Promise<void> => 
     const message = error instanceof Error ? error.message : 'Server error'
     let status: number
     switch (true) {
-      case message === 'User is not Zync a user':
+      case message === 'User is not a Zync user':
         status = 404
         break
       case message === 'You cannot add yourself as a contact':

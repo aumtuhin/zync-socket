@@ -70,7 +70,7 @@ const verifyEmailOTP = async (email: string, otp: string): Promise<IUser> => {
     { email },
     { isVerified: true },
     { upsert: true, new: true }
-  )
+  ).select('-password')
   // Delete OTP record after successful verification
   await OTP.deleteOne({ email, otp })
 

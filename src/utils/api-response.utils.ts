@@ -7,13 +7,13 @@ export const respond = {
   error: (res: Response, message: string, status = 400) =>
     res.status(status).json({
       success: false,
-      message,
+      message
     }),
 
   validationError: (res: Response, errors: { array(): unknown[] }) =>
     res.status(422).json({
       success: false,
       message: 'Validation Error',
-      errors: errors.array(),
-    }),
+      errors: errors.array()
+    })
 }

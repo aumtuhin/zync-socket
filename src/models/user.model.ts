@@ -56,14 +56,8 @@ const UserSchema = new mongoose.Schema<IUser>(
     createdAt: { type: Date, default: Date.now, expires: '30d' }, // Auto-delete unverified after 30 days
     contacts: [
       {
-        contactId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'User'
-        },
-        fullName: {
-          type: String,
-          trim: true
-        }
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Contact'
       }
     ],
     conversations: [

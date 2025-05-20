@@ -15,13 +15,6 @@ const createConversation = async (userId: string | JwtPayload, contactId: string
     participants: [userId, contactId]
   })
 
-  const participantIds = [userId, contactId]
-
-  await User.updateMany(
-    { _id: { $in: participantIds } },
-    { $addToSet: { conversations: newConversation._id } }
-  )
-
   return newConversation
 }
 
