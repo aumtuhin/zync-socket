@@ -10,6 +10,7 @@ export interface IUser extends mongoose.Document {
   isVerified: boolean
   avatar?: string
   contacts: mongoose.Types.ObjectId[]
+  conversations?: mongoose.Types.ObjectId[]
   createdAt: Date
 }
 
@@ -63,6 +64,12 @@ const UserSchema = new mongoose.Schema<IUser>(
           type: String,
           trim: true
         }
+      }
+    ],
+    conversations: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Conversation'
       }
     ]
   },

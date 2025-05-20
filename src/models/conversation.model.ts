@@ -2,6 +2,7 @@ import mongoose, { Schema, type Document } from 'mongoose'
 
 export interface IConversation extends Document {
   participants: mongoose.Types.ObjectId[]
+  messages?: mongoose.Types.ObjectId[]
   lastMessage?: mongoose.Types.ObjectId
   createdAt: Date
   updatedAt: Date
@@ -10,9 +11,10 @@ export interface IConversation extends Document {
 const ConversationSchema: Schema = new Schema(
   {
     participants: [{ type: Schema.Types.ObjectId, ref: 'User', required: true }],
-    lastMessage: { type: Schema.Types.ObjectId, ref: 'Message' },
+    messages: [{ type: Schema.Types.ObjectId, ref: 'Message' }],
+    lastMessage: { type: Schema.Types.ObjectId, ref: 'Message' }
   },
-  { timestamps: true },
+  { timestamps: true }
 )
 
 // Add compound index for faster participant lookup

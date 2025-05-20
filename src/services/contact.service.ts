@@ -34,8 +34,18 @@ const addContact = async (
 }
 
 const getContacts = async (userId: string | JwtPayload) => {
+  const ids = []
   const user = await User.findById(userId).populate('contacts')
-  return user?.contacts || []
+  if (!user) throw new Error('User not found')
+  if (user.contacts.length === 0) {
+    throw new Error('No contacts found')
+  }
+  for (const contact of user.contacts) {
+    ids.push(contact._id)
+  }
+  const contacts = await User.find({ _id: { $in: ids } }, { contacts: 0 }).lean()
+  if (!contacts) throw new Error('No contacts found')
+  return contacts
 }
 
 export default {

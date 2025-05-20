@@ -1,4 +1,3 @@
-// controllers/contact.controller.ts
 import type { Request, Response } from 'express'
 import contactService from '../services/contact.service'
 import { respond } from '../utils/api-response.utils'

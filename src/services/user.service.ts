@@ -10,7 +10,7 @@ const getUserProfile = async (userId: string | JwtPayload): Promise<IUser> => {
   const cachedUser = await cache.get(cacheKey)
   if (cachedUser) return cachedUser
 
-  const user = await User.findById(userId) // Exclude password field
+  const user = await User.findById(userId, { password: 0 })
   if (!user) throw new Error('User not found')
   await cache.set(cacheKey, user, 300)
   return user
