@@ -4,25 +4,25 @@ interface IMessage extends Document {
   conversation: mongoose.Types.ObjectId
   sender: mongoose.Types.ObjectId
   content: string
-  contentType: 'text' | 'image' | 'video' | 'file' | 'audio'
+  // contentType: 'text' | 'image' | 'video' | 'file' | 'audio'
   status: 'sent' | 'delivered' | 'read' | 'failed'
   readBy: mongoose.Types.ObjectId[]
-  reactions: {
-    userId: mongoose.Types.ObjectId
-    emoji: string
-  }[]
-  metadata: {
-    originalName?: string // For files
-    size?: number // For files
-    duration?: number // For audio/video
-    thumbnail?: string // For images/video
-  }
-  deleted: {
-    isDeleted: boolean
-    deletedBy?: mongoose.Types.ObjectId
-    deletedAt?: Date
-  }
-  edited: boolean
+  // reactions: {
+  //   userId: mongoose.Types.ObjectId
+  //   emoji: string
+  // }[]
+  // metadata: {
+  //   originalName?: string // For files
+  //   size?: number // For files
+  //   duration?: number // For audio/video
+  //   thumbnail?: string // For images/video
+  // }
+  // deleted: {
+  //   isDeleted: boolean
+  //   deletedBy?: mongoose.Types.ObjectId
+  //   deletedAt?: Date
+  // }
+  edited?: boolean
   replyTo?: mongoose.Types.ObjectId
   createdAt: Date
   updatedAt: Date

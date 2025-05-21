@@ -1,20 +1,34 @@
 import type { JwtPayload } from 'jsonwebtoken'
 import Conversation from '../models/conversation.model'
 
-const createConversation = async (userId: string | JwtPayload, contactId: string) => {
+// currently only string is supported for content
+const createConversation = async (
+  userId: string | JwtPayload,
+  recipientId: string,
+  content: string
+) => {
   const conversation = await Conversation.findOne({
-    participants: { $all: [userId, contactId] }
+    participants: { $all: [userId, recipientId] }
   })
 
   if (conversation) {
     throw new Error('Conversation already exists')
   }
 
-  const newConversation = await Conversation.create({
-    participants: [userId, contactId]
+  await Conversation.create({
+    participants: [userId, recipientId],
+    lastMessage: content
   })
 
-  return newConversation
+  const conversations = await Conversation.findOne({
+    participants: { $all: [userId, recipientId] }
+  })
+    .populate({ path: 'participants', select: 'username avatar email' })
+    .select({ messages: 0 })
+    .sort({ updatedAt: -1 })
+    .lean(true)
+
+  return conversations
 }
 
 const getConversations = async (userId: string | JwtPayload) => {

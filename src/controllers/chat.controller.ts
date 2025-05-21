@@ -5,7 +5,7 @@ import { respond } from '../utils/api-response.utils'
 
 export const createConversation = async (req: Request, res: Response): Promise<void> => {
   const userId = req.userId
-  const { contactId } = req.body
+  const { recipientId, content } = req.body
 
   if (!userId) {
     respond.error(res, 'Unauthorized ', 400)
@@ -13,7 +13,7 @@ export const createConversation = async (req: Request, res: Response): Promise<v
   }
 
   try {
-    const conversation = await chatService.createConversation(userId, contactId)
+    const conversation = await chatService.createConversation(userId, recipientId, content)
     respond.success(res, { message: 'Conversation created successfully', conversation }, 201)
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Server error'

@@ -3,10 +3,11 @@ import { body } from 'express-validator'
 // Common validation messages
 const messages = {
   id: 'Contact ID is required.',
-  idInvalid: 'Contact ID must be a valid UUID.'
+  idInvalid: 'Contact ID must be a valid UUID.',
+  content: 'Content is required.'
 }
 
-export const conversationIdValidator = body('contactId')
+export const conversationIdValidator = body('recipientId')
   .notEmpty()
   .withMessage(messages.id)
   .isMongoId()
@@ -14,4 +15,10 @@ export const conversationIdValidator = body('contactId')
   .trim()
   .escape()
 
-export const createConversationValidator = [conversationIdValidator]
+const contentValidator = body('content')
+  .notEmpty()
+  .withMessage(messages.content)
+  .isString()
+  .withMessage(messages.content)
+
+export const createConversationValidator = [conversationIdValidator, contentValidator]
