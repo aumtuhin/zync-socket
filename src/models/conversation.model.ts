@@ -16,7 +16,7 @@ const ConversationSchema: Schema = new Schema(
     participants: [{ type: Schema.Types.ObjectId, ref: 'User', required: true }],
     messages: [{ type: Schema.Types.ObjectId, ref: 'Message' }],
     lastMessage: { type: Schema.Types.ObjectId, ref: 'Message' },
-    unreadCount: { type: Number, default: 0 },
+    unreadCount: { type: Number || null, default: null },
     isArchived: { type: Boolean, default: false },
     isMuted: { type: Boolean, default: false }
   },

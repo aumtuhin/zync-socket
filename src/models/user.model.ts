@@ -47,8 +47,7 @@ const UserSchema = new mongoose.Schema<IUser>(
     },
     avatar: {
       type: String,
-      default:
-        'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
+      default: `https://api.dicebear.com/7.x/bottts/svg?seed=random-${Math.random()}`
     },
     isVerified: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now, expires: '30d' } // Auto-delete unverified after 30 days
