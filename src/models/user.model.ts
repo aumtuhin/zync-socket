@@ -1,3 +1,4 @@
+import { getRandomLetter } from '@/utils/random-letter.utils'
 import mongoose from 'mongoose'
 
 export interface IUser extends mongoose.Document {
@@ -47,7 +48,7 @@ const UserSchema = new mongoose.Schema<IUser>(
     },
     avatar: {
       type: String,
-      default: `https://api.dicebear.com/7.x/bottts/svg?seed=random-${Math.random()}`
+      default: `https://api.dicebear.com/7.x/bottts/svg?seed=random-${getRandomLetter()}`
     },
     isVerified: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now, expires: '30d' } // Auto-delete unverified after 30 days
