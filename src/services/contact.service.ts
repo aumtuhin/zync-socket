@@ -1,6 +1,7 @@
 import type { JwtPayload } from 'jsonwebtoken'
 import User from '../models/user.model'
 import Contact from '../models/contact.model'
+import type { ObjectId } from 'mongoose'
 
 const addContact = async (
   userId: string | JwtPayload,
@@ -19,12 +20,14 @@ const addContact = async (
 
   if (existingContact) throw new Error('Contact already exists')
 
-  const newContact = await Contact.create({
-    user: userId,
+  const contact = await Contact.create({
+    user: userId as ObjectId,
     recipient: zyncUser._id,
     nickname: fullName
   })
-  return newContact
+
+  await contact.populate('recipient', 'fullName username email avatar')
+  return contact
 }
 
 const getContacts = async (userId: string | JwtPayload) => {
@@ -38,7 +41,6 @@ const getContacts = async (userId: string | JwtPayload) => {
     })
     .sort({ nickname: 1 })
     .lean(true)
-  console.log(contacts)
   if (!contacts) throw new Error('No contacts found')
   return contacts
 }

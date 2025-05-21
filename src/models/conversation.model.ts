@@ -4,6 +4,9 @@ export interface IConversation extends Document {
   participants: mongoose.Types.ObjectId[]
   messages?: mongoose.Types.ObjectId[]
   lastMessage?: mongoose.Types.ObjectId
+  unreadCount?: number
+  isArchived?: boolean
+  isMuted?: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -12,7 +15,10 @@ const ConversationSchema: Schema = new Schema(
   {
     participants: [{ type: Schema.Types.ObjectId, ref: 'User', required: true }],
     messages: [{ type: Schema.Types.ObjectId, ref: 'Message' }],
-    lastMessage: { type: Schema.Types.ObjectId, ref: 'Message' }
+    lastMessage: { type: Schema.Types.ObjectId, ref: 'Message' },
+    unreadCount: { type: Number, default: 0 },
+    isArchived: { type: Boolean, default: false },
+    isMuted: { type: Boolean, default: false }
   },
   { timestamps: true }
 )

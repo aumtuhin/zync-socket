@@ -11,8 +11,8 @@ export const addContact = async (req: Request, res: Response): Promise<void> => 
       respond.error(res, 'Unauthorized ', 400)
       return
     }
-    await contactService.addContact(userId, fullName, email, phone)
-    respond.success(res, { message: 'Contact added successfully' }, 201)
+    const contact = await contactService.addContact(userId, fullName, email, phone)
+    respond.success(res, { message: 'Contact added successfully', contact }, 201)
     return
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Server error'

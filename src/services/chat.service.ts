@@ -1,6 +1,5 @@
 import type { JwtPayload } from 'jsonwebtoken'
 import Conversation from '../models/conversation.model'
-import User from '../models/user.model'
 
 const createConversation = async (userId: string | JwtPayload, contactId: string) => {
   const conversation = await Conversation.findOne({
