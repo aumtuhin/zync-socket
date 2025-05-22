@@ -17,13 +17,13 @@ const getUserProfile = async (userId: string | JwtPayload) => {
   if (!user) throw new Error('User not found')
 
   const contacts = await Contact.find({ user: userId })
-    .populate({ path: 'recipient', select: 'username avatar email' })
+    .populate({ path: 'recipient', select: 'nickname, username avatar email' })
     .select({ user: 0 })
     .sort({ nickname: 1 })
     .lean(true)
 
   const conversations = await Conversation.find({ participants: userId })
-    .populate({ path: 'participants', select: 'username avatar email' })
+    .populate({ path: 'participants', select: 'fullName username avatar email phone' })
     .select({ messages: 0 })
     .sort({ updatedAt: -1 })
     .lean(true)

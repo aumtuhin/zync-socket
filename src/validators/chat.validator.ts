@@ -2,9 +2,9 @@ import { body } from 'express-validator'
 
 // Common validation messages
 const messages = {
-  id: 'Contact ID is required.',
-  idInvalid: 'Contact ID must be a valid UUID.',
-  content: 'Content is required.'
+  id: 'Recipient ID is required.',
+  idInvalid: 'Recipient ID must be a valid UUID.',
+  content: 'Recipient is required.'
 }
 
 export const conversationIdValidator = body('recipientId')
@@ -15,7 +15,7 @@ export const conversationIdValidator = body('recipientId')
   .trim()
   .escape()
 
-const contentValidator = body('content')
+export const contentValidator = body('content')
   .notEmpty()
   .withMessage(messages.content)
   .isString()

@@ -6,13 +6,9 @@ import { formatValidationErrors } from '../../middlewares/error-formatter.middle
 
 const router = express.Router()
 
-router.get('/', verifyAccessToken, getContacts)
-router.post(
-  '/add-contact',
-  verifyAccessToken,
-  addContactValidator,
-  formatValidationErrors,
-  addContact,
-)
+router.use(verifyAccessToken)
+
+router.get('/', getContacts)
+router.post('/add-contact', addContactValidator, formatValidationErrors, addContact)
 
 export default router

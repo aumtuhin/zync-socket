@@ -6,13 +6,10 @@ import { formatValidationErrors } from '../../middlewares/error-formatter.middle
 
 const router = express.Router()
 
-router.post(
-  '/create',
-  verifyAccessToken,
-  createConversationValidator,
-  formatValidationErrors,
-  createConversation
-)
+// Middleware to verify access token
+router.use(verifyAccessToken)
+
+router.post('/create', createConversationValidator, formatValidationErrors, createConversation)
 router.get('/conversations', verifyAccessToken, getConversations)
 
 export default router

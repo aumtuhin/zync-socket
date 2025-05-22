@@ -13,6 +13,7 @@ import userRouter from './routes/v1/user.routes'
 import otpRoutes from './routes/v1/otp.routes'
 import contactRoutes from './routes/v1/contact.routes'
 import chatRoutes from './routes/v1/chat.routes'
+import messageRoute from './routes/v1/message.routes'
 
 // Middlewares & Configs
 import { connectDB } from './config/db.config'
@@ -45,6 +46,7 @@ app.use('/api/v1/user', userRouter)
 app.use('/api/v1/otp', otpRoutes)
 app.use('/api/v1/user/contacts', contactRoutes)
 app.use('/api/v1/chat', chatRoutes)
+app.use('/api/v1/messages', messageRoute)
 
 server.listen(config.port, () => {
   console.log(`Server is running on port ${config.port}`)
