@@ -1,21 +1,22 @@
 import type { Request, Response } from 'express'
 import * as messageService from '../services/message.service'
+import { respond } from '@/utils/api-response.utils'
 
 export const sendMessage = async (req: Request, res: Response): Promise<void> => {
   const { conversationId, content } = req.body
   if (!conversationId || !content) {
-    res.status(400).json({ success: false, message: 'Conversation ID and content are required' })
+    respond.error(res, 'Conversation ID and content are required', 400)
     return
   }
   const senderId = req.userId as string
 
   if (!senderId) {
-    res.status(400).json({ success: false, message: 'Unauthorized' })
+    respond.error(res, 'Unauthorized', 400)
     return
   }
 
   const message = await messageService.createMessage(senderId, conversationId, content)
-  res.status(201).json({ success: true, data: message })
+  respond.success(res, { message }, 201)
 }
 
 export const getConversationMessages = async (req: Request, res: Response): Promise<void> => {
@@ -23,17 +24,17 @@ export const getConversationMessages = async (req: Request, res: Response): Prom
   const userId = req.userId as string
 
   if (!conversationId) {
-    res.status(400).json({ success: false, message: 'Conversation ID is required' })
+    respond.error(res, 'Conversation ID is required', 400)
     return
   }
 
   if (!userId) {
-    res.status(400).json({ success: false, message: 'Unauthorized' })
+    respond.error(res, 'Unauthorized', 400)
     return
   }
 
   const messages = await messageService.getMessages(conversationId, userId)
-  res.json({ success: true, data: messages })
+  respond.success(res, { messages })
   return
 }
 
