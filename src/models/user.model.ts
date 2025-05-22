@@ -10,6 +10,7 @@ export interface IUser extends mongoose.Document {
   password?: string
   isVerified: boolean
   avatar?: string
+  lastActiveConversation?: mongoose.Types.ObjectId
   createdAt: Date
 }
 
@@ -51,6 +52,11 @@ const UserSchema = new mongoose.Schema<IUser>(
       default: `https://api.dicebear.com/7.x/bottts/svg?seed=random-${getRandomLetter()}`
     },
     isVerified: { type: Boolean, default: false },
+    lastActiveConversation: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Conversation',
+      default: null
+    },
     createdAt: { type: Date, default: Date.now, expires: '30d' } // Auto-delete unverified after 30 days
   },
   {

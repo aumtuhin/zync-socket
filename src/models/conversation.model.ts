@@ -3,7 +3,7 @@ import mongoose, { Schema, type Document } from 'mongoose'
 export interface IConversation extends Document {
   participants: mongoose.Types.ObjectId[]
   messages?: mongoose.Types.ObjectId[]
-  lastMessage?: mongoose.Types.ObjectId
+  lastMessage?: string | null
   unreadCount?: number
   isArchived?: boolean
   isMuted?: boolean

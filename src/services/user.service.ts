@@ -12,7 +12,15 @@ const getUserProfile = async (userId: string | JwtPayload) => {
   // const cachedUser = await cache.get(cacheKey)
 
   // if (cachedUser) return cachedUser
-  const user = await User.findById(userId).select('-password')
+  const user = await User.findById(userId)
+    .select('-password')
+    .populate({
+      path: 'lastActiveConversation',
+      populate: {
+        path: 'participants',
+        select: 'username fullName avatar'
+      }
+    })
 
   if (!user) throw new Error('User not found')
 

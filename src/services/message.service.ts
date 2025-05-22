@@ -1,11 +1,40 @@
 import Message from '../models/message.model'
+import Conversation from '../models/conversation.model'
+import User from '../models/user.model'
 
-export const createMessage = async (senderId: string, conversationId: string, content: string) => {
-  return await Message.create({
+export const createMessage = async (senderId: string, recipientId: string, content: string) => {
+  let conversation = await Conversation.findOne({
+    participants: { $all: [senderId, recipientId] },
+    $expr: { $eq: [{ $size: '$participants' }, 2] }
+  })
+
+  if (!conversation) {
+    conversation = await Conversation.create({
+      participants: [senderId, recipientId]
+    })
+  }
+
+  const message = await Message.create({
     sender: senderId,
-    conversation: conversationId,
+    conversation: conversation._id,
     content
   })
+
+  await User.findByIdAndUpdate(senderId, {
+    lastActiveConversation: conversation._id
+  })
+
+  await message.populate('sender', 'username fullName avatar')
+
+  if (!message) {
+    throw new Error('Message creation failed')
+  }
+
+  // Update lastMessage reference
+  conversation.lastMessage = content
+  await conversation.save()
+
+  return message
 }
 
 export const getMessages = async (conversationId: string, userId: string) => {

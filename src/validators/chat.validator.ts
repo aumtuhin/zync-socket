@@ -21,4 +21,4 @@ export const contentValidator = body('content')
   .isString()
   .withMessage(messages.content)
 
-export const createConversationValidator = [conversationIdValidator, contentValidator]
+export const createConversationValidator = [conversationIdValidator]

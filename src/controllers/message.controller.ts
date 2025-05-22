@@ -3,11 +3,12 @@ import * as messageService from '../services/message.service'
 import { respond } from '@/utils/api-response.utils'
 
 export const sendMessage = async (req: Request, res: Response): Promise<void> => {
-  const { conversationId, content } = req.body
-  if (!conversationId || !content) {
+  const { recipientId, content } = req.body
+  if (!recipientId || !content) {
     respond.error(res, 'Conversation ID and content are required', 400)
     return
   }
+
   const senderId = req.userId as string
 
   if (!senderId) {
@@ -15,7 +16,7 @@ export const sendMessage = async (req: Request, res: Response): Promise<void> =>
     return
   }
 
-  const message = await messageService.createMessage(senderId, conversationId, content)
+  const message = await messageService.createMessage(senderId, recipientId, content)
   respond.success(res, { message }, 201)
 }
 

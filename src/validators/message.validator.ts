@@ -8,7 +8,7 @@ const messages = {
   content: 'Content is required.'
 }
 
-export const conversationIdValidator = body('conversationId')
+export const conversationIdValidator = body('recipientId')
   .notEmpty()
   .withMessage(messages.id)
   .isMongoId()
