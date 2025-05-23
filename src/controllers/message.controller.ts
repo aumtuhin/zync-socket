@@ -16,8 +16,8 @@ export const sendMessage = async (req: Request, res: Response): Promise<void> =>
     return
   }
 
-  const message = await messageService.createMessage(senderId, recipientId, content)
-  respond.success(res, { message }, 201)
+  const messageResponse = await messageService.createMessage(senderId, recipientId, content)
+  respond.success(res, { messageResponse }, 201)
 }
 
 export const getConversationMessages = async (req: Request, res: Response): Promise<void> => {

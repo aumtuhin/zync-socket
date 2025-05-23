@@ -1,16 +1,17 @@
 import Message from '../models/message.model'
 import Conversation from '../models/conversation.model'
 import User from '../models/user.model'
-import { CacheKeys, delCache } from '../utils/redis-helpers.utils'
 
 export const createMessage = async (senderId: string, recipientId: string, content: string) => {
+  if (!senderId || !recipientId || !content) {
+    throw new Error('Missing parameters for creating message')
+  }
+
+  // Check or create conversation
   let conversation = await Conversation.findOne({
     participants: { $all: [senderId, recipientId] },
     $expr: { $eq: [{ $size: '$participants' }, 2] }
   })
-
-  delCache(CacheKeys.userConversations(senderId))
-  delCache(CacheKeys.userConversations(recipientId))
 
   if (!conversation) {
     conversation = await Conversation.create({
@@ -18,25 +19,29 @@ export const createMessage = async (senderId: string, recipientId: string, conte
     })
   }
 
+  // Create message
   const message = await Message.create({
     sender: senderId,
     conversation: conversation._id,
     content
   })
 
+  // Update sender's last active conversation
   await User.findByIdAndUpdate(senderId, {
     lastActiveConversation: conversation._id
   })
 
-  await message.populate('sender', 'username fullName avatar')
-
-  if (!message) {
-    throw new Error('Message creation failed')
-  }
-
-  // Update lastMessage reference
+  // Update conversation's last message
   conversation.lastMessage = content
   await conversation.save()
+
+  // Populate message and conversation participants
+  await message.populate('sender', 'username fullName avatar')
+
+  await conversation.populate({
+    path: 'participants',
+    select: 'username fullName avatar'
+  })
 
   return { message, conversation }
 }
