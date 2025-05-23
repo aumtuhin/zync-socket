@@ -1,12 +1,16 @@
 import Message from '../models/message.model'
 import Conversation from '../models/conversation.model'
 import User from '../models/user.model'
+import { CacheKeys, delCache } from '../utils/redis-helpers.utils'
 
 export const createMessage = async (senderId: string, recipientId: string, content: string) => {
   let conversation = await Conversation.findOne({
     participants: { $all: [senderId, recipientId] },
     $expr: { $eq: [{ $size: '$participants' }, 2] }
   })
+
+  delCache(CacheKeys.userConversations(senderId))
+  delCache(CacheKeys.userConversations(recipientId))
 
   if (!conversation) {
     conversation = await Conversation.create({
@@ -34,7 +38,7 @@ export const createMessage = async (senderId: string, recipientId: string, conte
   conversation.lastMessage = content
   await conversation.save()
 
-  return message
+  return { message, conversation }
 }
 
 export const getMessages = async (conversationId: string, userId: string) => {

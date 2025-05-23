@@ -1,5 +1,6 @@
 import type { JwtPayload } from 'jsonwebtoken'
 import Conversation from '../models/conversation.model'
+import { CacheKeys, delCache } from '../utils/redis-helpers.utils'
 
 // currently only string is supported for content
 const createConversation = async (userId: string | JwtPayload, recipientId: string) => {
@@ -18,6 +19,9 @@ const createConversation = async (userId: string | JwtPayload, recipientId: stri
   await Conversation.create({
     participants: [userId, recipientId]
   })
+
+  delCache(CacheKeys.userConversations(userId as string))
+  delCache(CacheKeys.userConversations(recipientId))
 
   const conversation = await Conversation.findOne({
     participants: { $all: [userId, recipientId] }
