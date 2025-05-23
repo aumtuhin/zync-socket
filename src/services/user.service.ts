@@ -2,49 +2,62 @@ import type { JwtPayload } from 'jsonwebtoken'
 import User, { type IUser } from '../models/user.model'
 import Contact from '../models/contact.model'
 import Conversation from '../models/conversation.model'
-import cache from './cache.service'
+import { setCache, getCache, delCache, CacheKeys } from '../utils/redis-helpers.utils'
 
-const getUserProfile = async (userId: string | JwtPayload) => {
+export const getUserProfile = async (userId: string | JwtPayload) => {
   if (!userId) throw new Error('User ID is required')
 
-  // const cacheKey = `user:${userId}`
+  const userIdStr = userId as string
 
-  // const cachedUser = await cache.get(cacheKey)
+  const userCacheKey = CacheKeys.user(userIdStr)
+  const contactsCacheKey = CacheKeys.userContacts(userIdStr)
+  const conversationsCacheKey = CacheKeys.userConversations(userIdStr)
 
-  // if (cachedUser) return cachedUser
-  const user = await User.findById(userId)
-    .select('-password')
-    .populate({
-      path: 'lastActiveConversation',
-      populate: {
-        path: 'participants',
-        select: 'username fullName avatar'
-      }
-    })
+  let user = await getCache(userCacheKey)
 
-  if (!user) throw new Error('User not found')
+  if (!user) {
+    const foundUser = await User.findById(userIdStr)
+      .select('-password')
+      .populate({
+        path: 'lastActiveConversation',
+        populate: {
+          path: 'participants',
+          select: 'username fullName avatar'
+        }
+      })
+      .lean()
+    if (!foundUser) throw new Error('User not found')
+    user = foundUser
+    await setCache(userCacheKey, user, 300)
+  }
 
-  const contacts = await Contact.find({ user: userId })
-    .populate({ path: 'recipient', select: 'nickname, username avatar email' })
-    .select({ user: 0 })
-    .sort({ nickname: 1 })
-    .lean(true)
+  let contacts = await getCache(contactsCacheKey)
 
-  const conversations = await Conversation.find({ participants: userId })
-    .populate({ path: 'participants', select: 'fullName username avatar email phone' })
-    .select({ messages: 0 })
-    .sort({ updatedAt: -1 })
-    .lean(true)
+  if (!contacts) {
+    contacts = await Contact.find({ user: userIdStr })
+      .populate({ path: 'recipient', select: 'nickname username avatar email' })
+      .select({ user: 0 })
+      .sort({ nickname: 1 })
+      .lean()
+    await setCache(contactsCacheKey, contacts, 300)
+  }
 
-  // await cache.set(cacheKey, user, 300)
+  let conversations = await getCache(conversationsCacheKey)
+  if (!conversations) {
+    conversations = await Conversation.find({ participants: userIdStr })
+      .populate({ path: 'participants', select: 'fullName username avatar email phone' })
+      .select({ messages: 0 })
+      .sort({ updatedAt: -1 })
+      .lean()
+    await setCache(conversationsCacheKey, conversations, 300)
+  }
 
   return {
     user,
-    contacts: contacts ? contacts : [],
-    conversations: conversations ? conversations : []
+    contacts,
+    conversations
   }
 }
-
 const completeProfile = async (
   userId: string | JwtPayload,
   fullName: string,
@@ -71,7 +84,8 @@ const completeProfile = async (
     throw new Error('User not found')
   }
 
-  await cache.del(cacheKey)
+  delCache(cacheKey)
+  setCache(cacheKey, updatedUser, 300)
   return updatedUser
 }
 

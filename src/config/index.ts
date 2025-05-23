@@ -1,5 +1,4 @@
-/* eslint-disable no-undef */
-import jwt from 'jsonwebtoken'
+import type jwt from 'jsonwebtoken'
 
 export default {
   port: process.env.PORT || 8000,
@@ -18,6 +17,9 @@ export default {
     user: process.env.EMAIL_USER as string,
     pass: process.env.EMAIL_PASS as string,
     service: process.env.EMAIL_SERVICE as string
+  },
+  mongo: {
+    uri: process.env.MONGO_URI as string
   },
   redis: {
     uri: process.env.REDIS_URL as string,

@@ -1,4 +1,4 @@
-import { getRandomLetter } from '@/utils/random-letter.utils'
+import { getRandomLetter } from '../utils/random-letter.utils'
 import mongoose from 'mongoose'
 
 export interface IUser extends mongoose.Document {

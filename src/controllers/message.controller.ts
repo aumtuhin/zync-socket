@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express'
 import * as messageService from '../services/message.service'
-import { respond } from '@/utils/api-response.utils'
+import { respond } from '../utils/api-response.utils'
 
 export const sendMessage = async (req: Request, res: Response): Promise<void> => {
   const { recipientId, content } = req.body

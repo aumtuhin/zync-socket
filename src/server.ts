@@ -16,7 +16,7 @@ import chatRoutes from './routes/v1/chat.routes'
 import messageRoute from './routes/v1/message.routes'
 
 // Middlewares & Configs
-import { connectDB } from './config/db.config'
+import { connectDB, connectRedis } from './db'
 import config from './config'
 import { corsOptions } from './config/cors.config'
 import { initSocket } from './sockets'
@@ -29,18 +29,19 @@ app.use(express.json())
 app.use(helmet())
 app.use(morgan('dev'))
 
-// MongoDB Connection
+// Connect to MongoDB and Redis
 connectDB()
+connectRedis()
 
+// initialize socket.io
 const server = createServer(app)
 const io = initSocket(server)
 io.on('connection', (socket) => socketHandler(io, socket))
 
-// Routes
+// API Routes
 app.get('/', (req, res) => {
   res.send('Welcome to the API')
 })
-
 app.use('/api/v1/auth', authRoutes)
 app.use('/api/v1/user', userRouter)
 app.use('/api/v1/otp', otpRoutes)
