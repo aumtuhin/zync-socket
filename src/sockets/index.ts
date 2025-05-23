@@ -5,7 +5,11 @@ import { authenticateSocket } from '../middlewares/auth.middleware'
 export const initSocket = (server: HttpServer): Server => {
   const io = new Server(server, {
     cors: {
-      origin: ['http://localhost:5173'],
+      origin: [
+        'https://zync-ashy.vercel.app',
+        'http://localhost:5173',
+        'http://192.168.0.116:5173'
+      ],
       credentials: true
     }
   })
