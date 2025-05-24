@@ -1,11 +1,13 @@
 import type { Server, Socket } from 'socket.io'
 import { createMessage } from '../services/message.service'
+import { notifyContactsStatusChange } from './notify-status'
 
 export const socketHandler = (io: Server, socket: Socket) => {
   socket.on('authenticate', (userId) => {
+    socket.data.userId = userId
     socket.join(userId)
     socket.emit('authenticated', { message: 'Authenticated successfully' })
-    console.log(`User ${userId} authenticated for private messages`)
+    notifyContactsStatusChange(io, userId, 'online')
   })
 
   socket.on('send_message', async ({ senderId, recipientId, content }) => {
@@ -18,6 +20,8 @@ export const socketHandler = (io: Server, socket: Socket) => {
   })
 
   socket.on('disconnect', () => {
-    console.log(`User disconnected: ${socket.id}`)
+    const userId = socket.data.userId
+    if (!userId) return
+    notifyContactsStatusChange(io, userId, 'offline')
   })
 }

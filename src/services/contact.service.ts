@@ -47,7 +47,43 @@ const getContacts = async (userId: string | JwtPayload) => {
   return contacts
 }
 
+const getMutualContacts = async (userId: string) => {
+  // Get mutual contacts of a user
+  const mutualContacts = await Contact.aggregate([
+    {
+      $match: { user: userId }
+    },
+    {
+      $lookup: {
+        from: 'contacts',
+        let: { recipientId: '$recipient' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [{ $eq: ['$user', '$$recipientId'] }, { $eq: ['$recipient', userId] }]
+              }
+            }
+          }
+        ],
+        as: 'reverseContact'
+      }
+    },
+    {
+      $match: { reverseContact: { $ne: [] } }
+    },
+    {
+      $project: {
+        _id: 0,
+        contactId: '$recipient'
+      }
+    }
+  ])
+
+  return mutualContacts
+}
 export default {
   addContact,
-  getContacts
+  getContacts,
+  getMutualContacts
 }

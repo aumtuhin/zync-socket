@@ -11,6 +11,8 @@ export interface IUser extends mongoose.Document {
   isVerified: boolean
   avatar?: string
   lastActiveConversation?: mongoose.Types.ObjectId
+  status?: 'online' | 'offline' | 'away'
+  lastSeen?: Date
   createdAt: Date
 }
 
