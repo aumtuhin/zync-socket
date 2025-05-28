@@ -14,9 +14,10 @@ export const delCache = async (key: string) => {
 }
 
 export const CacheKeys = {
-  userContacts: (userId: string) => `user_contacts:${userId}`,
-  userConversations: (userId: string) => `user_conversations:${userId}`,
   user: (userId: string) => `user:${userId}`,
   userProfile: (userId: string) => `user_profile:${userId}`,
+  userContacts: (userId: string) => `user_contacts:${userId}`,
+  userConversations: (userId: string) => `user_conversations:${userId}`,
+  userStatus: (userId: string) => `user_status:${userId}`,
   conversationMessages: (conversationId: string) => `conversation_messages:${conversationId}`
 }
