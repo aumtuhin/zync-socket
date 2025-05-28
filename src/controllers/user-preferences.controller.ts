@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express'
 import * as preferencesService from '../services/user-preferences.service'
-import { respond } from '@/utils/api-response.utils'
+import { respond } from '../utils/api-response.utils'
 
 // GET /api/preferences
 export const getPreferences = async (req: Request, res: Response): Promise<void> => {
