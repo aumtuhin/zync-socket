@@ -56,6 +56,13 @@ export const getMessages = async (conversationId: string, userId: string) => {
     .lean()
 }
 
+export const updateMessageStatus = async (messageId: string, status: string) => {
+  return await Message.findByIdAndUpdate(messageId, { status: status }, { new: true }).populate(
+    'sender',
+    'username fullName avatar'
+  )
+}
+
 export const markAsRead = async (messageId: string) => {
   return await Message.findByIdAndUpdate(messageId, { status: 'read' }, { new: true })
 }

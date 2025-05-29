@@ -1,4 +1,4 @@
-import { redisClient } from '../db'
+import { redisClient } from '../lib/redis.lib'
 
 export const setCache = async (key: string, value: unknown, ttlSeconds = 3600) => {
   await redisClient.set(key, JSON.stringify(value), { EX: ttlSeconds })

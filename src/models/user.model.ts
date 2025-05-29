@@ -54,6 +54,10 @@ const UserSchema = new mongoose.Schema<IUser>(
       default: `https://api.dicebear.com/7.x/bottts/svg?seed=random-${getRandomLetter()}`
     },
     isVerified: { type: Boolean, default: false },
+    status: {
+      type: String,
+      default: 'offline'
+    },
     lastActiveConversation: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Conversation',

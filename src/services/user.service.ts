@@ -27,7 +27,7 @@ export const getUserProfile = async (userId: string | JwtPayload) => {
   } | null
 
   const contacts = await Contact.find({ user: userId })
-    .populate({ path: 'recipient', select: 'nickname username avatar email' })
+    .populate({ path: 'recipient', select: 'nickname username avatar email status' })
     .select({ user: 0 })
     .sort({ nickname: 1 })
     .lean()
@@ -53,7 +53,7 @@ export const getUserProfile = async (userId: string | JwtPayload) => {
   )
 
   const conversations = await Conversation.find({ participants: userId })
-    .populate({ path: 'participants', select: 'fullName username avatar email phone' })
+    .populate({ path: 'participants', select: 'fullName username avatar email phone status' })
     .select({ messages: 0 })
     .sort({ updatedAt: -1 })
     .lean()

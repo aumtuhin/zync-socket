@@ -1,27 +1,13 @@
 import type { Server, Socket } from 'socket.io'
-import { createMessage } from '../services/message.service'
-import { notifyContactsStatusChange } from './notify-status'
+import { authenticate, disconnect } from './join-room'
+import { sendMessage, sendMessageStatus } from './messages'
 
 export const socketHandler = (io: Server, socket: Socket) => {
-  socket.on('authenticate', (userId) => {
-    socket.data.userId = userId
-    socket.join(userId)
-    socket.emit('authenticated', { message: 'Authenticated successfully' })
-    notifyContactsStatusChange(io, userId, 'online')
-  })
+  authenticate(io, socket)
 
-  socket.on('send_message', async ({ senderId, recipientId, content }) => {
-    const message = await createMessage(senderId, recipientId, content)
-    if (!message) {
-      socket.emit('error', 'Message creation failed')
-      return
-    }
-    io.to(senderId).to(recipientId).emit('receive_message', message)
-  })
+  sendMessage(io, socket)
 
-  socket.on('disconnect', () => {
-    const userId = socket.data.userId
-    if (!userId) return
-    notifyContactsStatusChange(io, userId, 'offline')
-  })
+  sendMessageStatus(io, socket)
+
+  disconnect(io, socket)
 }
