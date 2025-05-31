@@ -17,10 +17,10 @@ import chatRoutes from './routes/v1/chat.routes'
 import messageRoute from './routes/v1/message.routes'
 
 // Middlewares & Configs && libs
-import { connectDB } from './db'
 import config from './config'
 import { corsOptions } from './config/cors.config'
-import { initSocket } from './sockets'
+import { connectDB } from './lib/mongo.lib'
+import { initSocket } from './lib/socket.lib'
 import { socketHandler } from './sockets/socket.handler'
 import { connectRedis } from './lib/redis.lib'
 

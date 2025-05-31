@@ -1,6 +1,8 @@
 import { Server } from 'socket.io'
 import type { Server as HttpServer } from 'node:http'
 import { authenticateSocket } from '../middlewares/auth.middleware'
+import { redisPub, redisSub } from '../lib/redis.lib'
+import { createAdapter } from '@socket.io/redis-adapter'
 
 export const initSocket = (server: HttpServer): Server => {
   const io = new Server(server, {
@@ -14,5 +16,6 @@ export const initSocket = (server: HttpServer): Server => {
     }
   })
   io.use(authenticateSocket)
+  io.adapter(createAdapter(redisPub, redisSub))
   return io
 }

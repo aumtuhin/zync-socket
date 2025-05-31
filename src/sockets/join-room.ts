@@ -1,7 +1,7 @@
 import type { Server, Socket } from 'socket.io'
 import { notifyContactsStatusChange } from './notify-status'
 
-export const authenticate = (io: Server, socket: Socket) => {
+export const joinRoom = (io: Server, socket: Socket) => {
   socket.on('authenticate', (userId) => {
     socket.data.userId = userId
     socket.join(userId)
