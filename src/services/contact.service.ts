@@ -26,7 +26,7 @@ const addContact = async (
     nickname: fullName
   })
 
-  await contact.populate('recipient', 'fullName username email avatar')
+  await contact.populate('recipient', 'fullName username email avatar phone status')
 
   return contact
 }
@@ -35,7 +35,7 @@ const getContacts = async (userId: string | JwtPayload) => {
   const contacts = await Contact.find({ user: userId })
     .populate({
       path: 'user recipient',
-      select: 'username avatar email'
+      select: 'username avatar email phone status fullName nickname'
     })
     .select({
       user: 0

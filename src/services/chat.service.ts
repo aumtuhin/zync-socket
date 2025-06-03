@@ -6,7 +6,7 @@ const createConversation = async (userId: string | JwtPayload, recipientId: stri
   const existingConversation = await Conversation.findOne({
     participants: { $all: [userId, recipientId] }
   })
-    .populate({ path: 'participants', select: 'username avatar email' })
+    .populate({ path: 'participants', select: 'username avatar email phone status' })
     .select({ messages: 0 })
     .sort({ updatedAt: -1 })
     .lean(true)
