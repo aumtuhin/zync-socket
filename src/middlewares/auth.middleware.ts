@@ -2,7 +2,7 @@ import jwt, { type JwtPayload } from 'jsonwebtoken'
 import type { Request, Response, NextFunction } from 'express'
 import type { Socket } from 'socket.io'
 
-import type { SocketWithUser } from '../interfaces/chat.interface'
+import type { SocketWithUser } from '../types/chat.types'
 import config from '../config'
 import { respond } from '../utils/api-response.utils'
 
