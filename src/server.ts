@@ -13,7 +13,7 @@ import userRouter from './routes/v1/user.routes'
 import preferencesRoutes from './routes/v1/preferences.routes'
 import otpRoutes from './routes/v1/otp.routes'
 import contactRoutes from './routes/v1/contact.routes'
-import chatRoutes from './routes/v1/chat.routes'
+import convRoutes from './routes/v1/conversation.routes'
 import messageRoute from './routes/v1/message.routes'
 
 // Middlewares & Configs && libs
@@ -49,7 +49,7 @@ app.use('/api/v1/user', userRouter)
 app.use('/api/vi/preferences', preferencesRoutes)
 app.use('/api/v1/otp', otpRoutes)
 app.use('/api/v1/user/contacts', contactRoutes)
-app.use('/api/v1/chat', chatRoutes)
+app.use('/api/v1/chat', convRoutes)
 app.use('/api/v1/messages', messageRoute)
 
 server.listen(config.port, () => {

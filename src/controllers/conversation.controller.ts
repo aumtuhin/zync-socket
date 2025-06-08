@@ -1,6 +1,6 @@
 // controllers/contact.controller.ts
 import type { Request, Response } from 'express'
-import chatService from '../services/chat.service'
+import chatService from '../services/conversation.service'
 import { respond } from '../utils/api-response.utils'
 
 export const createConversation = async (req: Request, res: Response): Promise<void> => {
