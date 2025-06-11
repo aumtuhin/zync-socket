@@ -22,7 +22,6 @@ export default {
     uri: process.env.MONGO_URI as string
   },
   redis: {
-    uri: process.env.REDIS_URL as string,
     host: process.env.REDIS_HOST as string,
     username: process.env.REDIS_USERNAME as string,
     password: process.env.REDIS_PASSWORD as string,

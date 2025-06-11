@@ -8,6 +8,7 @@ import morgan from 'morgan'
 import cookieParser from 'cookie-parser'
 
 // Routes
+import welcomeRoutes from './routes/v1/welcome.routes'
 import authRoutes from './routes/v1/auth.routes'
 import userRouter from './routes/v1/user.routes'
 import preferencesRoutes from './routes/v1/preferences.routes'
@@ -41,9 +42,7 @@ const io = initSocket(server)
 io.on('connection', (socket) => socketHandler(io, socket))
 
 // API Routes
-app.get('/', (req, res) => {
-  res.send('Welcome to the API')
-})
+app.use('/api/v1/welcome', welcomeRoutes)
 app.use('/api/v1/auth', authRoutes)
 app.use('/api/v1/user', userRouter)
 app.use('/api/vi/preferences', preferencesRoutes)
