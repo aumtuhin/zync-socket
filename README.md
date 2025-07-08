@@ -1,11 +1,3 @@
 # Welcome to API
 
-Client A ----> Server Instance A
-                 |
-                 |   <-- Redis PUB (message, status)
-                 V
-              Redis
-                 ^
-                 |   <-- Redis SUB (message, status)
-                 |
-Client B ----> Server Instance B
+<img width="496" alt="Screenshot 2025-07-08 at 14 30 24" src="https://github.com/user-attachments/assets/a596b322-eecf-421a-9837-79d863281d73" />
